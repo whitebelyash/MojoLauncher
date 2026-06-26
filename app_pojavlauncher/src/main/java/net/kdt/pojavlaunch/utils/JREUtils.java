@@ -254,6 +254,16 @@ public class JREUtils {
                 useGles = true;
                 glesVersion = 3;
                 break;
+            case "opengles2_kw":
+                renderLibrary = "libng_gl4es.so"; // Requires EGL fixes
+                useGles = true;
+                glesVersion = 3;
+                break;
+            case "opengles3_mg":
+                renderLibrary = "libmobileglues.so";
+                useGles = true;
+                glesVersion = 3;
+                break;
             case "opengles2":
             case "opengles2_5":
             case "opengles3":
