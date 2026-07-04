@@ -10,7 +10,6 @@ import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
@@ -36,21 +35,18 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.kdt.mcgui.ProgressLayout;
 
 import net.kdt.pojavlaunch.instances.Instance;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
@@ -70,7 +66,6 @@ import org.apache.commons.io.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -432,7 +427,19 @@ public final class Tools {
         activity.runOnUiThread(()->dialog(activity, title, message));
     }
 
+    public static void dialogOnUiThread(final Activity activity, final int title, final int message) {
+        activity.runOnUiThread(()->dialog(activity, title, message));
+    }
+
     public static void dialog(final Context context, final CharSequence title, final CharSequence message) {
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
+    public static void dialog(final Context context, final int title, final int message) {
         new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
@@ -936,110 +943,10 @@ public final class Tools {
         throw new RuntimeException();
     }
 
-    private static void copyFileTree(Activity activity, Uri source, File dest, boolean isRoot) {
-        int progress = 0;
-        ContentResolver cr = activity.getContentResolver();
-        String[] projection = {
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                DocumentsContract.Document.COLUMN_MIME_TYPE,
-                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_SIZE
-        };
-        Cursor cursor = cr.query(source, projection, null, null, null);
-        if (cursor == null) throw new IllegalArgumentException();
-        int count = cursor.getCount();
-        int step = count > 0 ? 100 / count : 0;
-        // Check if instances directory is present (will do once if root directory)
-        if (isRoot) {
-            ProgressLayout.setProgress(ProgressLayout.DATA_MIGRATION, 0, R.string.migration_progress_checking);
-            boolean mojo = false;
-            cursor.moveToPosition(-1);
-            while (cursor.moveToNext()) {
-                if (cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)).equals("instances"))
-                    mojo = true;
-            }
-            if (!mojo)
-                throw new IllegalArgumentException("Tried to import non Mojo directory tree. It should have instances subdirectory!");
-        }
-        cursor.moveToPosition(-1);
-        while (cursor.moveToNext()) {
-            String file = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
-            String type = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE));
-            String id = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID));
-            long size = cursor.getLong(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE));
-            ProgressLayout.setProgress(ProgressLayout.DATA_MIGRATION, progress, file);
-            progress += step;
-            Uri child = DocumentsContract.buildChildDocumentsUriUsingTree(source, id);
-            if (type.equals(DocumentsContract.Document.MIME_TYPE_DIR)) {
-                File destDir = new File(dest, file);
-                // Prevent instance collisions
-                if(destDir.exists() && dest.getName().equals("instances"))
-                    continue;
-                if (!destDir.exists()) destDir.mkdirs();
-                copyFileTree(activity, child, destDir, false);
-            }
-            // Assuming file
-            else {
-                File destFile = new File(dest, file);
-                // Ignore files with the same size
-                if(destFile.length() == size) continue;
-                try {
-                    write(cr.openInputStream(child), destFile);
-                } catch (IOException e) {
-                    Log.e("DataMigration", "Failed to copy file " + source + "!!");
-                    Log.e("DataMigration", e.getMessage());
-                    cursor.close();
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        cursor.close();
-    }
-
-
     public static int getTranslationFromCursorY(int cursorY, int viewHeight, int imeHeight, int padding){
         int visibleHeight = viewHeight - imeHeight;
         if(cursorY < visibleHeight)
             return 0;
         return Math.min(imeHeight, cursorY - visibleHeight + padding);
-    }
-
-    /**
-     * Migrate data from other MojoLauncher installations. Must contain "instances" subdirectory.
-     * @param activity Activity
-     * @param uri Uri to the external root directory of the launcher (i.e. /sdcard/Android/data/git.artdeell.../). Must have "files" subdir
-     */
-    public static void migrateData(Activity activity, Uri uri){
-        Log.i("DataMigration", "Begin data migration!");
-
-        ProgressLayout.setProgress(ProgressLayout.DATA_MIGRATION, 0);
-        sExecutorService.submit(() -> {
-            activity.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            File root = new File(Tools.DIR_GAME_HOME);
-            Uri sourceUri = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
-            String authority = activity.getResources().getString(R.string.storageProviderAuthorities);
-            if(sourceUri.getAuthority() != null && sourceUri.getAuthority().contains(authority)){
-                runOnUiThread(() -> Toast.makeText(activity, R.string.migration_progress_self, Toast.LENGTH_LONG).show());
-                ProgressLayout.clearProgress(ProgressLayout.DATA_MIGRATION);
-                return;
-            }
-            // Extract files subdirectory not to confuse copyFileTree
-            String[] projection = {DocumentsContract.Document.COLUMN_DOCUMENT_ID};
-            String[] to = {"files"};
-            try (Cursor cursor = activity.getContentResolver().query(sourceUri, projection, null, to, null)) {
-                if (cursor == null) throw new IllegalArgumentException();
-                cursor.moveToFirst();
-                copyFileTree(activity, DocumentsContract.buildChildDocumentsUriUsingTree(sourceUri, cursor.getString(0)), root, true);
-                runOnUiThread(() -> Toast.makeText(activity, R.string.migration_progress_finish, Toast.LENGTH_LONG).show());
-            } catch (IllegalArgumentException e) {
-                runOnUiThread(() -> Toast.makeText(activity, R.string.migration_progress_foreign, Toast.LENGTH_LONG).show());
-            } catch (Exception e) {
-                Log.e("DataMigration", "Failed to import data to the launcher: " + e.getMessage());
-                runOnUiThread(() -> Toast.makeText(activity, R.string.migration_progress_failed, Toast.LENGTH_LONG).show());
-            } finally {
-                ProgressLayout.clearProgress(ProgressLayout.DATA_MIGRATION);
-                Log.i("DataMigration", "End data migration!");
-            }
-        });
     }
 }
