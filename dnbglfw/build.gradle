@@ -1,6 +1,5 @@
-plugins {
-    id 'com.android.library' version '8.11.1'
-}
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace 'git.artdeell.dnbglfw'
@@ -53,6 +52,12 @@ android {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
         }
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 

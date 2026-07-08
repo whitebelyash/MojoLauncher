@@ -1,8 +1,7 @@
-plugins {
-    id 'com.android.application' version '8.11.1'
-    id 'de.undercouch.download' version '5.6.0'
-    id 'org.ajoberstar.grgit' version '5.3.2'
-}
+apply plugin: 'com.android.application'
+apply plugin: 'de.undercouch.download'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.ajoberstar.grgit'
 
 apply from: rootProject.file('gradle/prefab_bypass.gradle')
 
@@ -171,6 +170,12 @@ android {
 
     buildFeatures {
         buildConfig true
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 

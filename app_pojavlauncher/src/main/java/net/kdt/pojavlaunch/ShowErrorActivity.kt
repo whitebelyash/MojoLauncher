@@ -1,0 +1,67 @@
+package net.kdt.pojavlaunch
+
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import net.kdt.pojavlaunch.lifecycle.ContextExecutorTask
+import net.kdt.pojavlaunch.utils.NotificationUtils
+import java.io.Serializable
+import git.artdeell.mojo.R
+
+class ShowErrorActivity : Activity() {
+
+    override fun onCreate(@Nullable savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val intent = intent
+        if (intent == null) {
+            finish()
+            return
+        }
+        val remoteErrorTask = intent.getSerializableExtra(ERROR_ACTIVITY_REMOTE_TASK) as? RemoteErrorTask
+        if (remoteErrorTask == null) {
+            finish()
+            return
+        }
+        remoteErrorTask.executeWithActivity(this)
+    }
+
+    class RemoteErrorTask(
+        private val mThrowable: Throwable,
+        private val mRolledMsg: String?
+    ) : ContextExecutorTask, Serializable {
+
+        override fun executeWithActivity(activity: Activity) {
+            if (mThrowable is ContextExecutorTask) {
+                (mThrowable as ContextExecutorTask).executeWithActivity(activity)
+            } else {
+                Tools.showError(activity, mRolledMsg, mThrowable, activity is ShowErrorActivity)
+            }
+        }
+
+        override fun executeWithApplication(context: Context) {
+            val showErrorIntent = Intent(context, ShowErrorActivity::class.java)
+            showErrorIntent.putExtra(ERROR_ACTIVITY_REMOTE_TASK, this)
+            NotificationUtils.sendBasicNotification(context,
+                R.string.notif_error_occured,
+                R.string.notif_error_occured_desc,
+                showErrorIntent,
+                NotificationUtils.PENDINGINTENT_CODE_SHOW_ERROR,
+                NotificationUtils.NOTIFICATION_ID_SHOW_ERROR
+            )
+        }
+    }
+
+    companion object {
+        private const val ERROR_ACTIVITY_REMOTE_TASK = "remoteTask"
+
+        fun installRemoteDialogHandling(callerActivity: Activity, @NonNull builder: AlertDialog.Builder) {
+            if (callerActivity is ShowErrorActivity) {
+                builder.setOnDismissListener { callerActivity.finish() }
+            }
+        }
+    }
+}
