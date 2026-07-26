@@ -45,7 +45,7 @@ public class InstanceEditorFragment extends Fragment implements CropperUtils.Cro
 
     private Instance mInstance;
     private String mSelectedControlLayout;
-    private Button mSaveButton, mDeleteButton, mControlSelectButton, mVersionSelectButton;
+    private Button mSaveButton, mDeleteButton, mControlSelectButton, mVersionSelectButton, mPinShortcutButton;
     private Spinner mDefaultRuntime, mDefaultRenderer;
     private EditText mDefaultName, mDefaultJvmArgument, mServerAutoConnect;
     private TextView mDefaultVersion, mDefaultControl;
@@ -175,6 +175,11 @@ public class InstanceEditorFragment extends Fragment implements CropperUtils.Cro
         mDefaultName.setText(nullToEmpty(instance.name));
         mDefaultControl.setText(mSelectedControlLayout == null ? nullToEmpty(instance.controlLayout) : mSelectedControlLayout);
         mSharedDataCheckbox.setChecked(instance.sharedData);
+
+        // Shortcut MineButton
+        mPinShortcutButton.setOnClickListener(v -> Instances.createInstanceShortcut(instance, getContext()));
+
+        // Server autoconnect field
         mServerAutoConnect.setText(nullToEmpty(instance.serverAddress));
     }
 
@@ -194,6 +199,7 @@ public class InstanceEditorFragment extends Fragment implements CropperUtils.Cro
         mInstanceIcon = view.findViewById(R.id.vprof_editor_instance_icon);
         mSharedDataCheckbox = view.findViewById(R.id.vprof_editor_data_checkbox_container);
         mServerAutoConnect = view.findViewById(R.id.vprof_editor_server_address);
+        mPinShortcutButton = view.findViewById(R.id.vprof_editor_pinshortcut_button);
     }
 
     private void save(){

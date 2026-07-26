@@ -447,4 +447,6 @@
     <string name="preference_custom_resolution_summary">Позволяет ввести пользовательский размер экрана для игры. В случае несоответствия соотношения сторон окно игры будет растянуто</string>
     <string name="preference_custom_resolution_width">Ширина экрана</string>
     <string name="preference_custom_resolution_height">Высота экрана</string>
+    <string name="shortcut_long_label">Запустить MJLauncher с установкой %1s</string>
+    <string name="shortcut_disabled">Данная установка была удалена</string>
 </resources>

@@ -514,4 +514,7 @@
     <string name="preference_custom_resolution_summary">Allows specifying custom resolution for the game. The window will stretch if the given resolution has different aspect ratio than the screen</string>
     <string name="preference_custom_resolution_width">Screen width</string>
     <string name="preference_custom_resolution_height">Screen height</string>
+    <string name="pedit_shortcut">Create shortcut</string>
+    <string name="shortcut_long_label">Start MJLauncher with "%1s" instance</string>
+    <string name="shortcut_disabled">This instance was removed.</string>
 </resources>
