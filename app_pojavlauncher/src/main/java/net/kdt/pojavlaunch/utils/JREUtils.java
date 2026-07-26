@@ -286,6 +286,8 @@ public class JREUtils {
     public static native int chdir(String path);
 
     public static native void setLdLibraryPath(String ldLibraryPath);
+    // See the redirect hook on the JNI side
+    public static native void setRedirectLibraryPath(String path);
     //public static native void initializeHooks();
     // Obtain AWT screen pixels to render on Android SurfaceView
     public static native boolean renderAWTScreenFrame(ByteBuffer tempBuffer);
