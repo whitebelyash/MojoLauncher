@@ -510,4 +510,8 @@
     <string name="loading_screen_warning">If you stuck here the game might been crashed</string>
     <string name="server_address_hint">(Enter an address to autoconnect)</string>
     <string name="vprof_server_addr">Server address</string>
+    <string name="preference_custom_resolution_title">Use custom resolution</string>
+    <string name="preference_custom_resolution_summary">Allows specifying custom resolution for the game. The window will stretch if the given resolution has different aspect ratio than the screen</string>
+    <string name="preference_custom_resolution_width">Screen width</string>
+    <string name="preference_custom_resolution_height">Screen height</string>
 </resources>
