@@ -1,5 +1,7 @@
 package net.kdt.pojavlaunch.customcontrols.mouse;
 
+import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
+
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -10,14 +12,14 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
+import net.kdt.pojavlaunch.platform.Platform;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
 import java.util.Arrays;
 
-import git.artdeell.dnbootstrap.glfw.GLFW;
-import git.artdeell.dnbootstrap.glfw.GrabListener;
 
-public class GyroControl implements SensorEventListener, GrabListener {
+public class GyroControl implements SensorEventListener, PlatformGrabListener {
     /* How much distance has to be moved before taking into account the gyro */
     private static final float SINGLE_AXIS_LOW_PASS_THRESHOLD = 0.00113F;
     private static final float MULTI_AXIS_LOW_PASS_THRESHOLD = 0.0013F;
@@ -71,8 +73,8 @@ public class GyroControl implements SensorEventListener, GrabListener {
         mSensorManager.registerListener(this, mSensor, 1000 * LauncherPreferences.PREF_GYRO_SAMPLE_RATE);
         mCorrectionListener.enable();
         // Avoid going through the JNI each time.
-        mShouldHandleEvents = GLFW.isGrabbing();
-        GLFW.addGrabListener(this);
+        mShouldHandleEvents = Platform.isGrabbing();
+        Platform.addGrabListener(this);
     }
 
     public void disable() {
@@ -105,27 +107,27 @@ public class GyroControl implements SensorEventListener, GrabListener {
         float absY = Math.abs(mStoredY);
 
         if(absX + absY > MULTI_AXIS_LOW_PASS_THRESHOLD) {
-            GLFW.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor);
-            GLFW.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor);
+            Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor);
+            Platform.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor);
             mStoredX = 0;
             mStoredY = 0;
             updatePosition = true;
         } else {
             if(Math.abs(mStoredX) > SINGLE_AXIS_LOW_PASS_THRESHOLD){
-                GLFW.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor);
+                Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor);
                 mStoredX = 0;
                 updatePosition = true;
             }
 
             if(Math.abs(mStoredY) > SINGLE_AXIS_LOW_PASS_THRESHOLD) {
-                GLFW.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor);
+                Platform.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor);
                 mStoredY = 0;
                 updatePosition = true;
             }
         }
 
         if(updatePosition){
-            GLFW.sendMousePos();
+            PLATFORM.sendMousePosition();
         }
     }
 

@@ -1,6 +1,7 @@
 package net.kdt.pojavlaunch.customcontrols;
 
 import android.graphics.Point;
+import android.util.Log;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -17,12 +18,16 @@ import java.util.ArrayList;
 
 public class LayoutConverter {
 
+    private static final int TARGET_VERSION = 9;
+
     public static CustomControls loadAndConvertIfNecessary(Point size, String jsonPath) throws IOException, JsonSyntaxException{
         File jsonFile = new File(jsonPath);
         LayoutBitmaps.ControlsContainer container = LayoutBitmaps.load(jsonFile);
         LayoutBitmaps layoutBitmaps = container.mLayoutZip;
         CustomControls controls = internalLoad(size, container.mControlsJson);
         if(controls == null) throw new IOException("Unsupported control layout version");
+        while(controls.version < TARGET_VERSION)
+            controls = upgradeLayout(size, controls);
         controls.mLayoutBitmaps = layoutBitmaps;
         return controls;
     }
@@ -45,6 +50,9 @@ public class LayoutConverter {
                     return convertV6_7Layout(layoutJobj);
                 }
                 else if (version == 8) {
+                    return convertV8Layout(Tools.GLOBAL_GSON.fromJson(jsonLayoutData, CustomControls.class));
+                }
+                else if(version == 9) {
                     return Tools.GLOBAL_GSON.fromJson(jsonLayoutData, CustomControls.class);
                 }
             }
@@ -52,6 +60,12 @@ public class LayoutConverter {
         } catch (JSONException e) {
             throw new JsonSyntaxException("Failed to load the layout. Maybe it's corrupted?", e);
         }
+    }
+
+    private static CustomControls upgradeLayout(Point size, CustomControls controls){
+        // Extremely ugly solution but it's how LayoutConverter was made
+        String layoutJson = Tools.GLOBAL_GSON.toJson(controls);
+        return internalLoad(size, layoutJson);
     }
 
 
@@ -184,6 +198,41 @@ public class LayoutConverter {
         empty.scaledAt = (float) oldLayoutJson.getDouble("scaledAt");
         empty.version = 3;
         return empty;
+    }
+
+    private static CustomControls convertV8Layout(CustomControls layout){
+        if(layout.version > 8)
+            return layout;
+        if(layout.mControlDataList != null){
+            for(ControlData data : layout.mControlDataList){
+                convertKeycodes(data.keycodes);
+            }
+        }
+        if(layout.mDrawerDataList != null){
+            for(ControlDrawerData drawerData : layout.mDrawerDataList){
+                convertKeycodes(drawerData.properties.keycodes);
+                if(drawerData.buttonProperties != null){
+                    for(ControlData data : drawerData.buttonProperties){
+                        convertKeycodes(data.keycodes);
+                    }
+                }
+            }
+        }
+        if(layout.mJoystickDataList != null){
+            for(ControlJoystickData data : layout.mJoystickDataList){
+                convertKeycodes(data.keycodes);
+            }
+        }
+        layout.version = 9;
+        return layout;
+    }
+
+    private static int[] convertKeycodes(int[] keycodes){
+        for(int i = 0; i < keycodes.length; i++){
+            if(keycodes[i] > 0)
+                keycodes[i] = Tools.KeyCodeFromGLFW(keycodes[i]);
+        }
+        return keycodes;
     }
 
 
