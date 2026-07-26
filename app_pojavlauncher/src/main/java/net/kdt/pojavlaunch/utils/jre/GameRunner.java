@@ -214,6 +214,7 @@ public class GameRunner {
         // Pre-process specific files
         disableSplash(gamedir);
         List<String> launchArgs = getMoJsonClientArgs(account, versionInfo, gamedir);
+        addMultiplayerArgs(launchArgs, instance, versionInfo);
 
         // Select the appropriate openGL version
         OldVersionsUtils.selectOpenGlVersion(versionInfo);
@@ -325,6 +326,22 @@ public class GameRunner {
         File agent = new File(Tools.DIR_DATA, "oshi-patcher/oshi-patcher.jar");
         if(!agent.exists()) return;
         javaArgList.add("-javaagent:" + agent.getAbsolutePath());
+    }
+
+    private static void addMultiplayerArgs(List<String> argList, Instance instance, JVersionList.Version version) throws ParseException {
+        if(instance.serverAddress == null) return;
+
+        // Since 23w14a the game uses quickPlayMultiplayer to connect to the server
+        if(DateUtils.dateBefore(DateUtils.getOriginalReleaseDate(version), 2023, 4, 5)){
+            String[] addr = instance.serverAddress.split(":", 2);
+            String server = addr[0];
+            String port = addr.length > 1 ? addr[1] : "25565";
+            argList.add("--server"); argList.add(server);
+            argList.add("--port"); argList.add(port);
+        } else {
+            boolean hasPort = instance.serverAddress.contains(":");
+            argList.add("--quickPlayMultiplayer"); argList.add(instance.serverAddress + (!hasPort ? ":25565" : ""));
+        }
     }
 
     private static List<String> getMoJsonJvmArgs(String versionName) {
