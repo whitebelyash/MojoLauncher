@@ -17,12 +17,12 @@ import java.util.ArrayList;
 
 public class LayoutConverter {
 
-    public static CustomControls loadAndConvertIfNecessary(Point size, String jsonPath) throws IOException, JsonSyntaxException{
+    public static CustomControls loadAndConvertIfNecessary(Point size, String jsonPath) throws IOException, JsonSyntaxException {
         File jsonFile = new File(jsonPath);
         LayoutBitmaps.ControlsContainer container = LayoutBitmaps.load(jsonFile);
         LayoutBitmaps layoutBitmaps = container.mLayoutZip;
         CustomControls controls = internalLoad(size, container.mControlsJson);
-        if(controls == null) throw new IOException("Unsupported control layout version");
+        if (controls == null) throw new IOException("Unsupported control layout version");
         controls.mLayoutBitmaps = layoutBitmaps;
         return controls;
     }
@@ -43,8 +43,7 @@ public class LayoutConverter {
                 }
                 if (version == 6 || version == 7) {
                     return convertV6_7Layout(layoutJobj);
-                }
-                else if (version == 8) {
+                } else if (version == 8) {
                     return Tools.GLOBAL_GSON.fromJson(jsonLayoutData, CustomControls.class);
                 }
             }
@@ -57,6 +56,7 @@ public class LayoutConverter {
 
     /**
      * Normalize the layout to v8 from v6/7. An issue from the joystick height and position has to be fixed.
+     *
      * @param oldLayoutJson The old layout
      * @return The new layout with the fixed joystick height
      */
@@ -68,7 +68,7 @@ public class LayoutConverter {
                 float ratio = data.getHeight() / data.getWidth();
 
                 data.dynamicX = data.dynamicX.replace("${height}", "(" + ratio + " * ${height})");
-                data.dynamicY = data.dynamicY.replace("${height}", "(" + ratio + " * ${height})") +  " + (" + (ratio-1) + " * ${height})";
+                data.dynamicY = data.dynamicY.replace("${height}", "(" + ratio + " * ${height})") + " + (" + (ratio - 1) + " * ${height})";
 
                 data.setHeight(data.getWidth());
             }

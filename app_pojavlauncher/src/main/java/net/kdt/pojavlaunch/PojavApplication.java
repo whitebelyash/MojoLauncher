@@ -32,80 +32,80 @@ import java.util.concurrent.TimeUnit;
 import git.artdeell.mojo.BuildConfig;
 
 public class PojavApplication extends Application {
-	public static final String CRASH_REPORT_TAG = "PojavCrashReport";
-	public static final ExecutorService sExecutorService = new ThreadPoolExecutor(4, 4, 500, TimeUnit.MILLISECONDS,  new LinkedBlockingQueue<>());
+    public static final String CRASH_REPORT_TAG = "PojavCrashReport";
+    public static final ExecutorService sExecutorService = new ThreadPoolExecutor(4, 4, 500, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-	private void installFatalErrorHandler() {
-		Thread.setDefaultUncaughtExceptionHandler((thread, th) -> {
-			boolean storagePermAllowed = (Build.VERSION.SDK_INT < 23 || Build.VERSION.SDK_INT >= 29 ||
-					ActivityCompat.checkSelfPermission(PojavApplication.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) && Tools.checkStorageRoot(PojavApplication.this);
-			File crashFile = new File(storagePermAllowed ? Tools.DIR_GAME_HOME : Tools.DIR_DATA, "latestcrash.txt");
-			try {
-				// Write to file, since some devices may not able to show error
-				FileUtils.ensureParentDirectory(crashFile);
-				PrintStream crashStream = new PrintStream(crashFile);
-				crashStream.append("PojavLauncher crash report\n");
-				crashStream.append(" - Time: ").append(DateFormat.getDateTimeInstance().format(new Date())).append("\n");
-				crashStream.append(" - Device: ").append(Build.PRODUCT).append(" ").append(Build.MODEL).append("\n");
-				crashStream.append(" - Android version: ").append(Build.VERSION.RELEASE).append("\n");
-				crashStream.append(" - Crash stack trace:\n");
-				crashStream.append(" - Launcher version: " + BuildConfig.VERSION_NAME + "\n");
-				crashStream.append(Log.getStackTraceString(th));
-				crashStream.close();
-			} catch (Throwable throwable) {
-				Log.e(CRASH_REPORT_TAG, " - Exception attempt saving crash stack trace:", throwable);
-				Log.e(CRASH_REPORT_TAG, " - The crash stack trace was:", th);
-			}
+    private void installFatalErrorHandler() {
+        Thread.setDefaultUncaughtExceptionHandler((thread, th) -> {
+            boolean storagePermAllowed = (Build.VERSION.SDK_INT < 23 || Build.VERSION.SDK_INT >= 29 ||
+                    ActivityCompat.checkSelfPermission(PojavApplication.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) && Tools.checkStorageRoot(PojavApplication.this);
+            File crashFile = new File(storagePermAllowed ? Tools.DIR_GAME_HOME : Tools.DIR_DATA, "latestcrash.txt");
+            try {
+                // Write to file, since some devices may not able to show error
+                FileUtils.ensureParentDirectory(crashFile);
+                PrintStream crashStream = new PrintStream(crashFile);
+                crashStream.append("PojavLauncher crash report\n");
+                crashStream.append(" - Time: ").append(DateFormat.getDateTimeInstance().format(new Date())).append("\n");
+                crashStream.append(" - Device: ").append(Build.PRODUCT).append(" ").append(Build.MODEL).append("\n");
+                crashStream.append(" - Android version: ").append(Build.VERSION.RELEASE).append("\n");
+                crashStream.append(" - Crash stack trace:\n");
+                crashStream.append(" - Launcher version: " + BuildConfig.VERSION_NAME + "\n");
+                crashStream.append(Log.getStackTraceString(th));
+                crashStream.close();
+            } catch (Throwable throwable) {
+                Log.e(CRASH_REPORT_TAG, " - Exception attempt saving crash stack trace:", throwable);
+                Log.e(CRASH_REPORT_TAG, " - The crash stack trace was:", th);
+            }
 
-			FatalErrorActivity.showError(PojavApplication.this, crashFile.getAbsolutePath(), storagePermAllowed, th);
-			Tools.fullyExit();
-		});
-	}
+            FatalErrorActivity.showError(PojavApplication.this, crashFile.getAbsolutePath(), storagePermAllowed, th);
+            Tools.fullyExit();
+        });
+    }
 
-	@Override
-	public void onCreate() {
-		ContextExecutor.setApplication(this);
-		// Disable fatal errors on gplay. This is necessary so that google can collect crash report data and send it to me
-		// (where i can find the cause and fix it)
+    @Override
+    public void onCreate() {
+        ContextExecutor.setApplication(this);
+        // Disable fatal errors on gplay. This is necessary so that google can collect crash report data and send it to me
+        // (where i can find the cause and fix it)
         //noinspection ConstantValue
-        if(!BuildConfig.BUILD_TYPE.equals("gplay")) installFatalErrorHandler();
-		
-		try {
-			super.onCreate();
-			if(Tools.checkStorageRoot(this)){
-				// Implicitly initializes early constants and storage constants.
-				// Required to run the main activity properly.
-				LauncherPreferences.loadPreferences(this);
-			} else {
-				// In other cases, only initialize enough for the basicmost basics to work
-				// and not explode.
-				Tools.initEarlyConstants(this);
-			}
-			Tools.DEVICE_ARCHITECTURE = Architecture.getDeviceArchitecture();
-			//Force x86 lib directory for Asus x86 based zenfones
-			if(Architecture.isx86Device() && Architecture.is32BitsDevice()){
-				String originalJNIDirectory = getApplicationInfo().nativeLibraryDir;
-				getApplicationInfo().nativeLibraryDir = originalJNIDirectory.substring(0,
-												originalJNIDirectory.lastIndexOf("/"))
-												.concat("/x86");
-			}
+        if (!BuildConfig.BUILD_TYPE.equals("gplay")) installFatalErrorHandler();
+
+        try {
+            super.onCreate();
+            if (Tools.checkStorageRoot(this)) {
+                // Implicitly initializes early constants and storage constants.
+                // Required to run the main activity properly.
+                LauncherPreferences.loadPreferences(this);
+            } else {
+                // In other cases, only initialize enough for the basicmost basics to work
+                // and not explode.
+                Tools.initEarlyConstants(this);
+            }
+            Tools.DEVICE_ARCHITECTURE = Architecture.getDeviceArchitecture();
+            //Force x86 lib directory for Asus x86 based zenfones
+            if (Architecture.isx86Device() && Architecture.is32BitsDevice()) {
+                String originalJNIDirectory = getApplicationInfo().nativeLibraryDir;
+                getApplicationInfo().nativeLibraryDir = originalJNIDirectory.substring(0,
+                                originalJNIDirectory.lastIndexOf("/"))
+                        .concat("/x86");
+            }
             MoJsonDownloader.prepareSubstitutionMap(getAssets());
-			AsyncAssetManager.unpackRuntime(getAssets());
-		} catch (Throwable throwable) {
-			Intent ferrorIntent = new Intent(this, FatalErrorActivity.class);
-			ferrorIntent.putExtra("throwable", throwable);
-			ferrorIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-			startActivity(ferrorIntent);
-		}
-	}
+            AsyncAssetManager.unpackRuntime(getAssets());
+        } catch (Throwable throwable) {
+            Intent ferrorIntent = new Intent(this, FatalErrorActivity.class);
+            ferrorIntent.putExtra("throwable", throwable);
+            ferrorIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+            startActivity(ferrorIntent);
+        }
+    }
 
-	@Override
-	public void onTerminate() {
-		super.onTerminate();
-		ContextExecutor.clearApplication();
-	}
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        ContextExecutor.clearApplication();
+    }
 
-	@Override
+    @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleUtils.setLocale(base));
     }

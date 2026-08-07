@@ -24,20 +24,21 @@ public class ModLoader {
 
     /**
      * Get the Version ID (the name of the mod loader in the versions/ folder)
+     *
      * @return the Version ID as a string
      */
     public String getVersionId() {
         switch (modLoaderType) {
             case MOD_LOADER_FORGE:
-                return gameVersion +"-forge-"+modLoaderVersion;
+                return gameVersion + "-forge-" + modLoaderVersion;
             case MOD_LOADER_FABRIC:
-                return "fabric-loader-"+modLoaderVersion+"-"+ gameVersion;
+                return "fabric-loader-" + modLoaderVersion + "-" + gameVersion;
             case MOD_LOADER_QUILT:
-                return "quilt-loader-"+modLoaderVersion+"-"+ gameVersion;
+                return "quilt-loader-" + modLoaderVersion + "-" + gameVersion;
             case MOD_LOADER_NEOFORGE:
-                return "neoforge-"+modLoaderVersion;
+                return "neoforge-" + modLoaderVersion;
             case MOD_LOADER_LEGACY_FABRIC:
-                return "legacy-fabric-loader-"+modLoaderVersion+"-"+ gameVersion;
+                return "legacy-fabric-loader-" + modLoaderVersion + "-" + gameVersion;
             default:
                 return null;
         }
@@ -45,9 +46,10 @@ public class ModLoader {
 
     /**
      * Perform the installation of a mod loader headlessly, if possible
+     *
      * @return the real version ID
      */
-    public String installHeadlessly() throws IOException{
+    public String installHeadlessly() throws IOException {
         switch (modLoaderType) {
             case MOD_LOADER_FABRIC:
                 return FabriclikeUtils.FABRIC_UTILS.install(gameVersion, modLoaderVersion);
@@ -64,6 +66,7 @@ public class ModLoader {
 
     /**
      * Create an InstanceInstaller, if GUI installation is required by this mod loader.
+     *
      * @return the InstanceInstaller that is used to complete mod loader installation.
      */
     public InstanceInstaller createInstaller() throws IOException {
@@ -82,6 +85,7 @@ public class ModLoader {
 
     /**
      * Check whether the mod loader this object denotes requires GUI installation
+     *
      * @return true if mod loader requires GUI installation, false otherwise
      */
     public boolean requiresGuiInstallation() {

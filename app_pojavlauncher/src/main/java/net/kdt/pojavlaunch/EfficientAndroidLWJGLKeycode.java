@@ -159,7 +159,7 @@ public class EfficientAndroidLWJGLKeycode {
     public static String[] generateKeyName() {
         if (androidKeyNameArray == null) {
             androidKeyNameArray = new String[sAndroidKeycodes.length];
-            for(int i=0; i < androidKeyNameArray.length; ++i){
+            for (int i = 0; i < androidKeyNameArray.length; ++i) {
                 androidKeyNameArray[i] = KeyEvent.keyCodeToString(sAndroidKeycodes[i]).replace("KEYCODE_", "");
             }
         }
@@ -177,18 +177,20 @@ public class EfficientAndroidLWJGLKeycode {
     }
 
 
-    /** @return the index at which the key is in the array, searching linearly */
+    /**
+     * @return the index at which the key is in the array, searching linearly
+     */
     public static int getIndexByValue(int lwjglKey) {
         //You should avoid using this function on performance critical areas
         for (int i = 0; i < sLwjglKeycodes.length; i++) {
-            if(sLwjglKeycodes[i] == lwjglKey) return i;
+            if (sLwjglKeycodes[i] == lwjglKey) return i;
         }
         return 0;
     }
 
-    private static void add(int androidKeycode, short LWJGLKeycode){
+    private static void add(int androidKeycode, short LWJGLKeycode) {
         sAndroidKeycodes[mTmpCount] = androidKeycode;
         sLwjglKeycodes[mTmpCount] = LWJGLKeycode;
-        mTmpCount ++;
+        mTmpCount++;
     }
 }

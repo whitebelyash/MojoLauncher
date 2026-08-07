@@ -6,7 +6,7 @@ public class MavenNameUtils {
         String[] libInfos = libName.split(":");
         StringBuilder builder = new StringBuilder()
                 .append(libInfos[0]).append(':').append(libInfos[1]);
-        for(int i = 3; i < libInfos.length; i++) {
+        for (int i = 3; i < libInfos.length; i++) {
             builder.append(':').append(libInfos[i]);
         }
         return builder.toString();
@@ -26,9 +26,9 @@ public class MavenNameUtils {
                 .append(libInfos[2])
                 .append('/')
                 .append(libInfos[1]);
-        for(int i = 2; i < libInfos.length; i++) {
+        for (int i = 2; i < libInfos.length; i++) {
             String libInfo = libInfos[i];
-            if(libInfo.isEmpty()) continue;
+            if (libInfo.isEmpty()) continue;
             builder.append('-').append(libInfo);
         }
         return builder;

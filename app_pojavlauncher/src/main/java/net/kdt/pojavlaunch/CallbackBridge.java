@@ -20,6 +20,11 @@ public class CallbackBridge {
     public volatile static boolean holdingAlt, holdingCapslock, holdingCtrl,
             holdingNumlock, holdingShift;
 
+    static {
+        System.loadLibrary("pojavexec");
+        minibridgeInit();
+    }
+
     public static void performClick(int button) {
         double ox = GLFW.cursorX, oy = GLFW.cursorY;
         GLFW.sendMouseEvent(button, 1, CallbackBridge.getCurrentMods());
@@ -29,7 +34,6 @@ public class CallbackBridge {
             GLFW.sendMouseEvent(button, 0, CallbackBridge.getCurrentMods());
         }, 33);
     }
-
 
     public static void sendKeyPress(int keyCode) {
         GLFW.sendKeyEvent(keyCode, true, getCurrentMods());
@@ -52,13 +56,17 @@ public class CallbackBridge {
         int currMods = 0;
         if (holdingAlt) {
             currMods |= LwjglGlfwKeycode.GLFW_MOD_ALT;
-        } if (holdingCapslock) {
+        }
+        if (holdingCapslock) {
             currMods |= LwjglGlfwKeycode.GLFW_MOD_CAPS_LOCK;
-        } if (holdingCtrl) {
+        }
+        if (holdingCtrl) {
             currMods |= LwjglGlfwKeycode.GLFW_MOD_CONTROL;
-        } if (holdingNumlock) {
+        }
+        if (holdingNumlock) {
             currMods |= LwjglGlfwKeycode.GLFW_MOD_NUM_LOCK;
-        } if (holdingShift) {
+        }
+        if (holdingShift) {
             currMods |= LwjglGlfwKeycode.GLFW_MOD_SHIFT;
         }
         return currMods;
@@ -72,8 +80,8 @@ public class CallbackBridge {
         CallbackBridge.holdingShift = keyEvent.isShiftPressed();
     }
 
-    public static void setModifiers(int keyCode, boolean isDown){
-        switch (keyCode){
+    public static void setModifiers(int keyCode, boolean isDown) {
+        switch (keyCode) {
             case LwjglGlfwKeycode.GLFW_KEY_LEFT_SHIFT:
                 CallbackBridge.holdingShift = isDown;
                 return;
@@ -97,14 +105,14 @@ public class CallbackBridge {
 
     @Keep
     public static void openLink(String link) {
-        ContextExecutor.executeActivity(ctx->{
+        ContextExecutor.executeActivity(ctx -> {
             try {
-                if(link.startsWith("file:")) {
+                if (link.startsWith("file:")) {
                     int truncLength = 5;
-                    if(link.startsWith("file://")) truncLength = 7;
+                    if (link.startsWith("file://")) truncLength = 7;
                     String path = link.substring(truncLength);
                     Tools.openPath(ctx, new File(path), false);
-                }else {
+                } else {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(Uri.parse(link), "*/*");
                     ctx.startActivity(intent);
@@ -117,7 +125,7 @@ public class CallbackBridge {
 
     @SuppressWarnings("unused") //TODO: actually use it
     public static void openPath(String path) {
-        ContextExecutor.executeActivity(ctx->{
+        ContextExecutor.executeActivity(ctx -> {
             try {
                 Tools.openPath(ctx, new File(path), false);
             } catch (Throwable th) {
@@ -127,10 +135,5 @@ public class CallbackBridge {
     }
 
     public static native void minibridgeInit();
-
-    static {
-        System.loadLibrary("pojavexec");
-        minibridgeInit();
-    }
 }
 

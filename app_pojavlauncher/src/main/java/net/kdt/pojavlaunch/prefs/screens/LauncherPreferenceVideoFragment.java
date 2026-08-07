@@ -4,17 +4,18 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import androidx.preference.SwitchPreferenceCompat;
-
-import git.artdeell.mojo.R;
 
 import net.kdt.pojavlaunch.Architecture;
 import net.kdt.pojavlaunch.plugins.LibraryPlugin;
 import net.kdt.pojavlaunch.prefs.CustomSeekBarPreference;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.utils.RendererCompatUtil;
+
+import git.artdeell.mojo.R;
 
 /**
  * Fragment for any settings video related
@@ -54,11 +55,10 @@ public class LauncherPreferenceVideoFragment extends LauncherPreferenceFragment 
         // Same but for ZINK plugin
         SwitchPreference legacyZink = requirePreference("zinkForceLegacy", SwitchPreference.class);
         legacyZink.setChecked(LauncherPreferences.PREF_ZINK_FORCE_LEGACY);
-        if(!Architecture.isx86Device()) {
+        if (!Architecture.isx86Device()) {
             LibraryPlugin zink = LibraryPlugin.discoverPlugin(getContext(), LibraryPlugin.ID_ZINK_PLUGIN);
             legacyZink.setVisible(zink != null);
-        }
-        else {
+        } else {
             legacyZink.setVisible(false);
         }
 
@@ -75,7 +75,7 @@ public class LauncherPreferenceVideoFragment extends LauncherPreferenceFragment 
     public void onResume() {
         super.onResume();
         Activity activity = getActivity();
-        if(activity != null) {
+        if (activity != null) {
             requirePreference("ignoreNotch").setVisible(LauncherPreferences.hasNotch(activity));
         }
     }
@@ -86,7 +86,7 @@ public class LauncherPreferenceVideoFragment extends LauncherPreferenceFragment 
         computeVisibility();
     }
 
-    private void computeVisibility(){
+    private void computeVisibility() {
         requirePreference("force_vsync", SwitchPreferenceCompat.class)
                 .setVisible(LauncherPreferences.PREF_USE_ALTERNATE_SURFACE);
     }

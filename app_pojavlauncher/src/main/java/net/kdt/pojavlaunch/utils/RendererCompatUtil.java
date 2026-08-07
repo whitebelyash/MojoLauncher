@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Build;
 
-import net.kdt.pojavlaunch.Architecture;
 import net.kdt.pojavlaunch.Tools;
 
 import java.io.File;
@@ -20,16 +19,18 @@ public class RendererCompatUtil {
     private static RenderersList sCompatibleRenderers;
 
     public static boolean checkVulkanSupport(PackageManager packageManager) {
-        if(SDK_INT >= Build.VERSION_CODES.N) {
+        if (SDK_INT >= Build.VERSION_CODES.N) {
             return packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL) &&
                     packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION);
         }
         return false;
     }
 
-    /** Return the renderers that are compatible with this device */
+    /**
+     * Return the renderers that are compatible with this device
+     */
     public static RenderersList getCompatibleRenderers(Context context) {
-        if(sCompatibleRenderers != null) return sCompatibleRenderers;
+        if (sCompatibleRenderers != null) return sCompatibleRenderers;
         Resources resources = context.getResources();
         String[] defaultRenderers = resources.getStringArray(R.array.renderer_values);
         String[] defaultRendererNames = resources.getStringArray(R.array.renderer);
@@ -41,13 +42,14 @@ public class RendererCompatUtil {
         boolean appHasLtw = new File(Tools.NATIVE_LIB_DIR, "libltw.so").exists();
         List<String> rendererIds = new ArrayList<>(defaultRenderers.length);
         List<String> rendererNames = new ArrayList<>(defaultRendererNames.length);
-        for(int i = 0; i < defaultRenderers.length; i++) {
+        for (int i = 0; i < defaultRenderers.length; i++) {
             String rendererId = defaultRenderers[i];
-            if(rendererId.contains("vulkan") && !deviceHasVulkan) continue;
-            if(rendererId.contains("zink") && !deviceCompatibleMesa) continue;
+            if (rendererId.contains("vulkan") && !deviceHasVulkan) continue;
+            if (rendererId.contains("zink") && !deviceCompatibleMesa) continue;
             // freedreno is available only on Adreno GPUs
-            if(rendererId.contains("freedreno") && (!(GLInfoUtils.getGlInfo().isAdreno()) || !deviceCompatibleMesa)) continue;
-            if(rendererId.contains("ltw") && (!deviceHasOpenGLES3 || !appHasLtw)) continue;
+            if (rendererId.contains("freedreno") && (!(GLInfoUtils.getGlInfo().isAdreno()) || !deviceCompatibleMesa))
+                continue;
+            if (rendererId.contains("ltw") && (!deviceHasOpenGLES3 || !appHasLtw)) continue;
             rendererIds.add(rendererId);
             rendererNames.add(defaultRendererNames[i]);
         }
@@ -57,12 +59,16 @@ public class RendererCompatUtil {
         return sCompatibleRenderers;
     }
 
-    /** Checks if the renderer Id is compatible with the current device */
+    /**
+     * Checks if the renderer Id is compatible with the current device
+     */
     public static boolean checkRendererCompatible(Context context, String rendererName) {
-         return getCompatibleRenderers(context).rendererIds.contains(rendererName);
+        return getCompatibleRenderers(context).rendererIds.contains(rendererName);
     }
 
-    /** Releases the cache of compatible renderers. */
+    /**
+     * Releases the cache of compatible renderers.
+     */
     public static void releaseRenderersCache() {
         sCompatibleRenderers = null;
         System.gc();

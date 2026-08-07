@@ -1,34 +1,45 @@
 package net.kdt.pojavlaunch;
 
-import android.content.*;
-import android.graphics.*;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BlendMode;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.SurfaceTexture;
 import android.os.Build;
-import android.text.*;
-import android.util.*;
-import android.view.*;
+import android.text.TextPaint;
+import android.util.AttributeSet;
+import android.view.Surface;
+import android.view.TextureView;
+import android.view.ViewGroup;
+
+import net.kdt.pojavlaunch.utils.JREUtils;
 
 import java.nio.ByteBuffer;
-import java.util.*;
-import net.kdt.pojavlaunch.utils.*;
+import java.util.LinkedList;
 
 public class AWTCanvasView extends TextureView implements TextureView.SurfaceTextureListener, Runnable {
     public static final int AWT_CANVAS_WIDTH = 720;
     public static final int AWT_CANVAS_HEIGHT = 600;
     private static final int MAX_SIZE = 100;
     private static final double NANOS = 1000000000.0;
-    private boolean mIsDestroyed = false;
     private final TextPaint mFpsPaint;
-
     // Temporary count fps https://stackoverflow.com/a/13729241
-    private final LinkedList<Long> mTimes = new LinkedList<Long>(){{add(System.nanoTime());}};
-    
+    private final LinkedList<Long> mTimes = new LinkedList<Long>() {{
+        add(System.nanoTime());
+    }};
+    private boolean mIsDestroyed = false;
+
     public AWTCanvasView(Context ctx) {
         this(ctx, null);
     }
-    
+
     public AWTCanvasView(Context ctx, AttributeSet attrs) {
         super(ctx, attrs);
-        
+
         mFpsPaint = new TextPaint();
         mFpsPaint.setColor(Color.WHITE);
         mFpsPaint.setTextSize(20);
@@ -71,7 +82,7 @@ public class AWTCanvasView extends TextureView implements TextureView.SurfaceTex
         Paint paint = new Paint();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             paint.setBlendMode(BlendMode.SRC);
-        }else{
+        } else {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         }
         boolean mDrawing;
@@ -87,8 +98,8 @@ public class AWTCanvasView extends TextureView implements TextureView.SurfaceTex
                     rgbArrayBitmap.copyPixelsFromBuffer(targetBuffer);
                     canvas.drawBitmap(rgbArrayBitmap, 0, 0, paint);
                     canvas.restore();
-                }else {
-                    canvas.drawRGB(0,0,0);
+                } else {
+                    canvas.drawRGB(0, 0, 0);
                 }
                 canvas.drawText("FPS: " + (Math.round(fps() * 10) / 10) + ", drawing=" + mDrawing, 0, 20, mFpsPaint);
             }
@@ -99,7 +110,9 @@ public class AWTCanvasView extends TextureView implements TextureView.SurfaceTex
         surface.release();
     }
 
-    /** Calculates and returns frames per second */
+    /**
+     * Calculates and returns frames per second
+     */
     private double fps() {
         long lastTime = System.nanoTime();
         double difference = (lastTime - mTimes.getFirst()) / NANOS;
@@ -111,13 +124,15 @@ public class AWTCanvasView extends TextureView implements TextureView.SurfaceTex
         return difference > 0 ? mTimes.size() / difference : 0.0;
     }
 
-    /** Make the view fit the proper aspect ratio of the surface */
-    private void refreshSize(){
+    /**
+     * Make the view fit the proper aspect ratio of the surface
+     */
+    private void refreshSize() {
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
 
-        if(getHeight() < getWidth()){
+        if (getHeight() < getWidth()) {
             layoutParams.width = AWT_CANVAS_WIDTH * getHeight() / AWT_CANVAS_HEIGHT;
-        }else{
+        } else {
             layoutParams.height = AWT_CANVAS_HEIGHT * getWidth() / AWT_CANVAS_WIDTH;
         }
 

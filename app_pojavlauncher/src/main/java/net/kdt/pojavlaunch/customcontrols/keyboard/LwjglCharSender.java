@@ -1,12 +1,13 @@
 package net.kdt.pojavlaunch.customcontrols.keyboard;
 
-import net.kdt.pojavlaunch.LwjglGlfwKeycode;
-
 import net.kdt.pojavlaunch.CallbackBridge;
+import net.kdt.pojavlaunch.LwjglGlfwKeycode;
 
 import git.artdeell.dnbootstrap.glfw.GLFW;
 
-/** Sends keys via the CallBackBridge */
+/**
+ * Sends keys via the CallBackBridge
+ */
 public class LwjglCharSender implements CharacterSenderStrategy {
     @Override
     public void sendBackspace() {

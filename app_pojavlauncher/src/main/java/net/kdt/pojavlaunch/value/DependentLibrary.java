@@ -16,14 +16,16 @@ public class DependentLibrary {
     public ExtractSettings extract;
 
     @Keep
-	public static class LibraryDownloads {
-		public LibraryArtifact artifact;
+    public static class LibraryDownloads {
+        public LibraryArtifact artifact;
         public LibraryClassifierMap classifiers;
-		public LibraryDownloads(LibraryArtifact artifact) {
-			this.artifact = artifact;
-		}
-	}
 
-    public static class LibraryClassifierMap extends HashMap<String, LibraryArtifact> {}
+        public LibraryDownloads(LibraryArtifact artifact) {
+            this.artifact = artifact;
+        }
+    }
+
+    public static class LibraryClassifierMap extends HashMap<String, LibraryArtifact> {
+    }
 }
 

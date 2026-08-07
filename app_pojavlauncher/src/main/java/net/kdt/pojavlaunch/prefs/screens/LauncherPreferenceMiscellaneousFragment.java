@@ -12,19 +12,19 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
 
-import git.artdeell.mojo.R;
-
 import net.kdt.pojavlaunch.LauncherActivity;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.tasks.DataMigrator;
 import net.kdt.pojavlaunch.utils.GLInfoUtils;
 import net.kdt.pojavlaunch.utils.RendererCompatUtil;
 
+import git.artdeell.mojo.R;
+
 public class LauncherPreferenceMiscellaneousFragment extends LauncherPreferenceFragment {
 
     private final ActivityResultLauncher<Uri> mMigrateLauncher = registerForActivityResult(
             new ActivityResultContracts.OpenDocumentTree(), (uri) -> {
-                if(uri != null) {
+                if (uri != null) {
                     new AlertDialog.Builder(getLauncherActivity())
                             .setTitle(R.string.migration_progress_warning_title)
                             .setMessage(R.string.migration_progress_warning_summary)
@@ -45,7 +45,7 @@ public class LauncherPreferenceMiscellaneousFragment extends LauncherPreferenceF
         driverPreference.setVisible(supportsTurnip);
         Preference importPreference = requirePreference("runDataMigration");
         importPreference.setOnPreferenceClickListener(preference -> {
-            if(ProgressKeeper.getTaskCount() > 0) {
+            if (ProgressKeeper.getTaskCount() > 0) {
                 Toast.makeText(getContext(), R.string.tasks_ongoing, Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -55,7 +55,7 @@ public class LauncherPreferenceMiscellaneousFragment extends LauncherPreferenceF
         setupMicrophoneRequestPreference();
     }
 
-    private void updateVisibility(){
+    private void updateVisibility() {
         requirePreference("microphoneAccessRequest").setVisible(!getLauncherActivity().checkForPermissionRationale(33, Manifest.permission.RECORD_AUDIO));
     }
 
@@ -67,7 +67,7 @@ public class LauncherPreferenceMiscellaneousFragment extends LauncherPreferenceF
     private void setupMicrophoneRequestPreference() {
         Preference mRequestMicrophonePermissionPreference = requirePreference("microphoneAccessRequest");
         Activity activity = getActivity();
-        if(activity instanceof LauncherActivity) {
+        if (activity instanceof LauncherActivity) {
             mRequestMicrophonePermissionPreference.setOnPreferenceClickListener(preference -> {
                 ((LauncherActivity) activity).askForPermission(23, Manifest.permission.RECORD_AUDIO);
                 return true;

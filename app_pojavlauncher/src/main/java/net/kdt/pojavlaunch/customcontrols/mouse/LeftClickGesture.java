@@ -18,6 +18,15 @@ public class LeftClickGesture extends DistanceGesture {
         super(handler);
     }
 
+    public static boolean isFingerStill(float startX, float startY, float endX, float endY, float threshold) {
+        return MathUtils.dist(
+                endX,
+                endY,
+                startX,
+                startY
+        ) <= threshold;
+    }
+
     @Override
     void onGestureSubmitted() {
 
@@ -37,7 +46,7 @@ public class LeftClickGesture extends DistanceGesture {
     public boolean checkAndTrigger() {
         boolean fingerStill = travelBelowThreshold(LeftClickGesture.FINGER_STILL_THRESHOLD);
         // If the finger is still, fire the gesture.
-        if(fingerStill) {
+        if (fingerStill) {
             sendMouseButton(LwjglGlfwKeycode.GLFW_MOUSE_BUTTON_LEFT, true);
             mMouseActivated = true;
         }
@@ -47,18 +56,9 @@ public class LeftClickGesture extends DistanceGesture {
 
     @Override
     public void onGestureCancelled(boolean isSwitching) {
-        if(mMouseActivated) {
+        if (mMouseActivated) {
             sendMouseButton(LwjglGlfwKeycode.GLFW_MOUSE_BUTTON_LEFT, false);
             mMouseActivated = false;
         }
-    }
-
-    public static boolean isFingerStill(float startX, float startY, float endX, float endY, float threshold) {
-        return MathUtils.dist(
-                endX,
-                endY,
-                startX,
-                startY
-        ) <= threshold;
     }
 }

@@ -3,12 +3,11 @@ package net.kdt.pojavlaunch.customcontrols.mouse;
 
 import android.os.Handler;
 
+import net.kdt.pojavlaunch.CallbackBridge;
 import net.kdt.pojavlaunch.LwjglGlfwKeycode;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
-import net.kdt.pojavlaunch.CallbackBridge;
-
-public class DropGesture implements Runnable{
+public class DropGesture implements Runnable {
     private final Handler mHandler;
     private boolean mActive;
 
@@ -17,7 +16,7 @@ public class DropGesture implements Runnable{
     }
 
     public void submit() {
-        if(!mActive) {
+        if (!mActive) {
             mActive = true;
             mHandler.postDelayed(this, LauncherPreferences.PREF_LONGPRESS_TRIGGER);
         }
@@ -30,7 +29,7 @@ public class DropGesture implements Runnable{
 
     @Override
     public void run() {
-        if(!mActive) return;
+        if (!mActive) return;
         CallbackBridge.sendKeyPress(LwjglGlfwKeycode.GLFW_KEY_Q);
         mHandler.postDelayed(this, 250);
     }

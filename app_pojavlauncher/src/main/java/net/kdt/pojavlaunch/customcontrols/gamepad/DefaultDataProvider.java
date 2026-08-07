@@ -8,7 +8,8 @@ public class DefaultDataProvider implements GamepadDataProvider {
     public static final DefaultDataProvider INSTANCE = new DefaultDataProvider();
 
     // Cannot instantiate this class publicly
-    private DefaultDataProvider() {}
+    private DefaultDataProvider() {
+    }
 
     @Override
     public GamepadMap getGameMap() {

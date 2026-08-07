@@ -7,7 +7,6 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodManager;
 
@@ -21,9 +20,14 @@ import git.artdeell.mojo.R;
  */
 public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText {
     public static final String TEXT_FILLER = "                              ";
+    private boolean mIsDoingInternalChanges = false;
+    private CharacterSenderStrategy mCharacterSender;
+
     public TouchCharInput(@NonNull Context context) {
         this(context, null);
     }
+
+
     public TouchCharInput(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.attr.editTextStyle);
     }
@@ -31,10 +35,6 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
         super(context, attrs, defStyleAttr);
         setup();
     }
-
-
-    private boolean mIsDoingInternalChanges = false;
-    private CharacterSenderStrategy mCharacterSender;
 
     /**
      * When we change from app to app, the keyboard gets disabled.
@@ -62,13 +62,13 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
     /**
      * Toggle on and off the soft keyboard, depending of the state
      */
-    public void switchKeyboardState(){
+    public void switchKeyboardState() {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(INPUT_METHOD_SERVICE);
         // Allow, regardless of whether or not a hardware keyboard is declared
-        if(hasFocus()){
+        if (hasFocus()) {
             clear();
             disable();
-        }else{
+        } else {
             enable();
             imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT);
         }
@@ -79,7 +79,7 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
      * Clear the EditText from any leftover inputs
      * It does not affect the in-game input
      */
-    public void clear(){
+    public void clear() {
         mIsDoingInternalChanges = true;
         // Edit the Editable directly as it doesn't affect the state
         // of the TextView.
@@ -91,16 +91,20 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
         mIsDoingInternalChanges = false;
     }
 
-    /** Regain ability to exist, take focus and have some text being input */
-    public void enable(){
+    /**
+     * Regain ability to exist, take focus and have some text being input
+     */
+    public void enable() {
         setEnabled(true);
         setFocusable(true);
         setVisibility(VISIBLE);
         requestFocus();
     }
 
-    /** Lose ability to exist, take focus and have some text being input */
-    public void disable(){
+    /**
+     * Lose ability to exist, take focus and have some text being input
+     */
+    public void disable() {
         clear();
         setVisibility(GONE);
         clearFocus();
@@ -108,19 +112,25 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
         //setFocusable(false);
     }
 
-    /** Send the enter key. */
-    private void sendEnter(){
+    /**
+     * Send the enter key.
+     */
+    private void sendEnter() {
         mCharacterSender.sendEnter();
         clear();
     }
 
-    /** Just sets the char sender that should be used. */
-    public void setCharacterSender(CharacterSenderStrategy characterSender){
+    /**
+     * Just sets the char sender that should be used.
+     */
+    public void setCharacterSender(CharacterSenderStrategy characterSender) {
         mCharacterSender = characterSender;
     }
 
-    /** This function deals with anything that has to be executed when the constructor is called */
-    private void setup(){
+    /**
+     * This function deals with anything that has to be executed when the constructor is called
+     */
+    private void setup() {
         // Using TextWatcher instead of overriding onTextChanged because some Huawei firmware
         // calls setText in constructor, causing havoc for our listener
         addTextChangedListener(new InputTextWatcher());
@@ -133,6 +143,7 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
         clear();
         disable();
     }
+
     private class InputTextWatcher implements android.text.TextWatcher {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -146,12 +157,11 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
          */
         @Override
         public void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-            if(mIsDoingInternalChanges) return;
-            if(mCharacterSender != null){
-                for(int i=0; i < lengthBefore; ++i){
+            if (mIsDoingInternalChanges) return;
+            if (mCharacterSender != null) {
+                for (int i = 0; i < lengthBefore; ++i) {
                     mCharacterSender.sendBackspace();
                 }
-
 
 
                 mCharacterSender.sendChars(text.subSequence(start, start + lengthAfter));
@@ -160,10 +170,10 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if(mIsDoingInternalChanges) return;
+            if (mIsDoingInternalChanges) return;
             // Moved from onTextChanged because "It is an error to attempt to make changes to s from this callback."
             // reference: https://developer.android.com/reference/android/text/TextWatcher#onTextChanged(java.lang.CharSequence,%20int,%20int,%20int)
-            if(editable.length() < 1) clear();
+            if (editable.length() < 1) clear();
         }
     }
 }

@@ -40,6 +40,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.kdt.LoggerView;
 
+import net.kdt.pojavlaunch.authenticator.accounts.Account;
 import net.kdt.pojavlaunch.authenticator.accounts.Accounts;
 import net.kdt.pojavlaunch.customcontrols.ControlButtonMenuListener;
 import net.kdt.pojavlaunch.customcontrols.ControlData;
@@ -61,7 +62,6 @@ import net.kdt.pojavlaunch.services.GameService;
 import net.kdt.pojavlaunch.tasks.AsyncAssetManager;
 import net.kdt.pojavlaunch.utils.JREUtils;
 import net.kdt.pojavlaunch.utils.MCOptionUtils;
-import net.kdt.pojavlaunch.authenticator.accounts.Account;
 import net.kdt.pojavlaunch.utils.RendererCompatUtil;
 import net.kdt.pojavlaunch.utils.jre.GameRunner;
 
@@ -80,8 +80,15 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public static final String INTENT_LAUNCH_CLASSPATH = "intent_classpath";
 
     public static TouchCharInput touchCharInput;
-    private LauncherGLSurface launcherGLView;
+    public static boolean mForceFullPanning = false;
+    public static int mImeHeight = 0;
     private static WeakReference<GLFWCursorView> weakCursor;
+    public ArrayAdapter<String> ingameControlsEditorArrayAdapter;
+    public AdapterView.OnItemClickListener ingameControlsEditorListener;
+    Instance instance;
+    Account account;
+    boolean isInEditor;
+    private LauncherGLSurface launcherGLView;
     private GLFWCursorView cursor;
     private LoggerView loggerView;
     private DrawerLayout drawerLayout;
@@ -91,27 +98,45 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     private ControlLayout mControlLayout;
     private HotbarView mHotbarView;
     private volatile AndroidClipboardProvider mClipboardProvider;
-
-    Instance instance;
-    Account account;
-
     private ArrayAdapter<String> gameActionArrayAdapter;
     private AdapterView.OnItemClickListener gameActionClickListener;
-    public ArrayAdapter<String> ingameControlsEditorArrayAdapter;
-    public AdapterView.OnItemClickListener ingameControlsEditorListener;
     private GameService.LocalBinder mServiceBinder;
-
     private QuickSettingSideDialog mQuickSettingSideDialog;
 
-    public static boolean mForceFullPanning = false;
-    public static int mImeHeight = 0;
+    public static void toggleMouse(Context ctx) {
+        // Avoid going through the JNI each time.
+        if (GLFW.isGrabbing()) return;
+        GLFWCursorView cursorView = Tools.getWeakReference(weakCursor);
+        if (cursorView == null) return;
+        int toastString = 0;
+        switch (cursorView.getVisibility()) {
+            case View.GONE:
+            case View.INVISIBLE:
+                toastString = R.string.control_mouseon;
+                cursorView.setVisibility(View.VISIBLE);
+                break;
+            case View.VISIBLE:
+                toastString = R.string.control_mouseoff;
+                cursorView.setVisibility(View.GONE);
+                break;
+        }
+
+        if (toastString != 0) Toast.makeText(ctx, toastString, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void switchKeyboardState(boolean panning) {
+        if (touchCharInput != null) {
+            touchCharInput.switchKeyboardState();
+            MainActivity.mForceFullPanning = panning;
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         instance = Instances.loadSelectedInstance();
         account = Accounts.getCurrent();
-        if(instance == null) {
+        if (instance == null) {
             Toast.makeText(this, R.string.instance_dir_missing, Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -128,31 +153,31 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         mGyroControl = new GyroControl(this);
 
         // Enabling this on TextureView results in a broken white result
-        if(PREF_USE_ALTERNATE_SURFACE) getWindow().setBackgroundDrawable(null);
+        if (PREF_USE_ALTERNATE_SURFACE) getWindow().setBackgroundDrawable(null);
         else getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
 
         // Set the sustained performance mode for available APIs
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             getWindow().setSustainedPerformanceMode(PREF_SUSTAINED_PERFORMANCE);
 
         // This is required on Android 10 for the insets listener
         // https://issuetracker.google.com/issues/266331465
         boolean androidCompat = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
-        if(androidCompat)
+        if (androidCompat)
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         // Make keyboard pan the activity so the user sees what they're typing
         ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (view, insets) -> {
-            if(launcherGLView.mSurface == null)
+            if (launcherGLView.mSurface == null)
                 return insets;
             ViewPropertyAnimator animSurface = launcherGLView.mSurface.animate()
                     .setDuration(100);
             ViewPropertyAnimator animCursor = cursor.animate()
                     .setDuration(100);
-            if(!insets.isVisible(WindowInsetsCompat.Type.ime())){
+            if (!insets.isVisible(WindowInsetsCompat.Type.ime())) {
                 animSurface.translationY(0).start();
                 animCursor.translationY(0).start();
                 mImeHeight = 0;
-                if(androidCompat) {
+                if (androidCompat) {
                     // AndroidX keeps SystemUI visible for some reason after IME session
                     view.postDelayed(() -> {
                         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN);
@@ -160,12 +185,12 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
                 }
                 return insets;
             }
-            if(!mForceFullPanning && !LauncherPreferences.PREF_KEYBOARD_AUTOPANNING)
+            if (!mForceFullPanning && !LauncherPreferences.PREF_KEYBOARD_AUTOPANNING)
                 return insets;
             mImeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
             int translationY;
             // Autopanning (if keyboardPan wasn't clicked)
-            if(!mForceFullPanning) {
+            if (!mForceFullPanning) {
                 int cursorY = (int) (GLFW.cursorY * launcherGLView.mSurface.getHeight()) + 100;
                 translationY = Tools.getTranslationFromCursorY(
                         cursorY,
@@ -183,14 +208,27 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         ingameControlsEditorArrayAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.menu_customcontrol));
         ingameControlsEditorListener = (parent, view, position, id) -> {
-            switch(position) {
-                case 0: mControlLayout.addControlButton(new ControlData("New")); break;
-                case 1: mControlLayout.addDrawer(new ControlDrawerData()); break;
-                case 2: mControlLayout.addJoystickButton(new ControlJoystickData()); break;
-                case 3: mControlLayout.openLoadDialog(); break;
-                case 4: mControlLayout.openSaveDialog(this); break;
-                case 5: mControlLayout.openSetDefaultDialog(); break;
-                case 6: mControlLayout.openExitDialog(this);
+            switch (position) {
+                case 0:
+                    mControlLayout.addControlButton(new ControlData("New"));
+                    break;
+                case 1:
+                    mControlLayout.addDrawer(new ControlDrawerData());
+                    break;
+                case 2:
+                    mControlLayout.addJoystickButton(new ControlJoystickData());
+                    break;
+                case 3:
+                    mControlLayout.openLoadDialog();
+                    break;
+                case 4:
+                    mControlLayout.openSaveDialog(this);
+                    break;
+                case 5:
+                    mControlLayout.openSetDefaultDialog();
+                    break;
+                case 6:
+                    mControlLayout.openExitDialog(this);
             }
         };
 
@@ -217,7 +255,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
         try {
             File latestLogFile = new File(Tools.DIR_GAME_HOME, "latestlog.txt");
-            if(!latestLogFile.exists() && !latestLogFile.createNewFile())
+            if (!latestLogFile.exists() && !latestLogFile.createNewFile())
                 throw new IOException("Failed to create a new log file");
             Logger.begin(latestLogFile.getAbsolutePath());
 
@@ -236,12 +274,22 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
             gameActionArrayAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.menu_ingame));
             gameActionClickListener = (parent, view, position, id) -> {
-                switch(position) {
-                     case 0: dialogForceClose(MainActivity.this); break;
-                     case 1: openLogOutput(); break;
-                     case 2: dialogSendCustomKey(); break;
-                     case 3: openQuickSettings(); break;
-                     case 4: openCustomControls(); break;
+                switch (position) {
+                    case 0:
+                        dialogForceClose(MainActivity.this);
+                        break;
+                    case 1:
+                        openLogOutput();
+                        break;
+                    case 2:
+                        dialogSendCustomKey();
+                        break;
+                    case 3:
+                        openQuickSettings();
+                        break;
+                    case 4:
+                        openCustomControls();
+                        break;
                 }
                 drawerLayout.closeDrawers();
             };
@@ -251,9 +299,11 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
             launcherGLView.setSurfaceReadyListener(() -> {
                 try {
-                    Tools.runOnUiThread(() -> { if(PREF_VIRTUAL_MOUSE_START) cursor.setVisibility(View.VISIBLE); });
+                    Tools.runOnUiThread(() -> {
+                        if (PREF_VIRTUAL_MOUSE_START) cursor.setVisibility(View.VISIBLE);
+                    });
                     runCraft(version, classpath);
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     Tools.showErrorRemote(e);
                 }
             });
@@ -266,7 +316,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         try {
             // Load keys
             mControlLayout.loadLayout(instance.getLaunchControls());
-        } catch(IOException e) {
+        } catch (IOException e) {
             try {
                 Log.w("MainActivity", "Unable to load the control file, loading the default now", e);
                 mControlLayout.loadLayout(Tools.CTRLDEF_FILE);
@@ -283,14 +333,16 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     @Override
     public void onAttachedToWindow() {
         // Post to get the correct display dimensions after layout.
-        mControlLayout.post(()->{
+        mControlLayout.post(() -> {
             Tools.getDisplayMetrics(this);
             loadControls();
         });
     }
 
-    /** Boilerplate binding */
-    private void bindValues(){
+    /**
+     * Boilerplate binding
+     */
+    private void bindValues() {
         mControlLayout = findViewById(R.id.main_control_layout);
         launcherGLView = findViewById(R.id.main_game_render_view);
         cursor = findViewById(R.id.main_touchpad);
@@ -307,7 +359,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public void onResume() {
         super.onResume();
         ContextExecutor.setActivity(this);
-        if(PREF_ENABLE_GYRO) mGyroControl.enable();
+        if (PREF_ENABLE_GYRO) mGyroControl.enable();
         //CallbackBridge.nativeSetWindowAttrib(LwjglGlfwKeycode.GLFW_HOVERED, 1);
     }
 
@@ -316,10 +368,10 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         ContextExecutor.clearActivity();
         mGyroControl.disable();
         // Avoid going through the JNI each time.
-        if (GLFW.isGrabbing()){
+        if (GLFW.isGrabbing()) {
             CallbackBridge.sendKeyPress(LwjglGlfwKeycode.GLFW_KEY_ESCAPE);
         }
-        if(mQuickSettingSideDialog != null) {
+        if (mQuickSettingSideDialog != null) {
             mQuickSettingSideDialog.cancel();
         }
         //CallbackBridge.nativeSetWindowAttrib(LwjglGlfwKeycode.GLFW_HOVERED, 0);
@@ -348,13 +400,13 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if(mGyroControl != null) mGyroControl.updateOrientation();
+        if (mGyroControl != null) mGyroControl.updateOrientation();
         // Layout resize is practically guaranteed on a configuration change, and `onConfigurationChanged`
         // does not implicitly start a layout. So, request a layout and expect the screen dimensions to be valid after the]
         // post.
-        if(mControlLayout == null) return;
+        if (mControlLayout == null) return;
         mControlLayout.requestLayout();
-        mControlLayout.post(()->{
+        mControlLayout.post(() -> {
             // Child of mControlLayout, so refreshing size here is correct
             launcherGLView.refreshSize();
             mControlLayout.refreshControlButtonPositions();
@@ -364,7 +416,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if(launcherGLView != null)  // Useful when backing out of the app
+        if (launcherGLView != null)  // Useful when backing out of the app
             Tools.MAIN_HANDLER.postDelayed(() -> launcherGLView.refreshSize(), 500);
     }
 
@@ -376,7 +428,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
             // Reload PREF_DEFAULTCTRL_PATH
             // If the storage root got unmounted/unreadable we won't be able to load the file anyway,
             // and MissingStorageActivity will be started.
-            if(!Tools.checkStorageRoot(this)) return;
+            if (!Tools.checkStorageRoot(this)) return;
             LauncherPreferences.loadPreferences(getApplicationContext());
             try {
                 mControlLayout.loadLayout(LauncherPreferences.PREF_DEFAULTCTRL_PATH);
@@ -388,10 +440,10 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
     private void runCraft(String versionId, File[] classpath) throws Throwable {
         String renderer = instance.getLaunchRenderer();
-        if(!RendererCompatUtil.checkRendererCompatible(this, renderer)) {
+        if (!RendererCompatUtil.checkRendererCompatible(this, renderer)) {
             RendererCompatUtil.RenderersList renderersList = RendererCompatUtil.getCompatibleRenderers(this);
             String firstCompatibleRenderer = renderersList.rendererIds.get(0);
-            Log.w("runCraft","Incompatible renderer "+renderer+ " will be replaced with "+firstCompatibleRenderer);
+            Log.w("runCraft", "Incompatible renderer " + renderer + " will be replaced with " + firstCompatibleRenderer);
             renderer = firstCompatibleRenderer;
         }
         Logger.appendToLog("--------- Starting game with Launcher Debug!");
@@ -399,7 +451,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         JREUtils.redirectAndPrintJRELog();
         GameRunner.launchGame(this, account, instance, versionId, classpath, renderer);
         //Note that we actually stall in the above function, even if the game crashes. But let's be safe.
-        Tools.runOnUiThread(()-> mServiceBinder.isActive = false);
+        Tools.runOnUiThread(() -> mServiceBinder.isActive = false);
     }
 
     private void dialogSendCustomKey() {
@@ -409,9 +461,9 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         dialog.show();
     }
 
-    boolean isInEditor;
     private void openCustomControls() {
-        if(ingameControlsEditorListener == null || ingameControlsEditorArrayAdapter == null) return;
+        if (ingameControlsEditorListener == null || ingameControlsEditorArrayAdapter == null)
+            return;
 
         mControlLayout.setModifiable(true);
         navDrawer.setAdapter(ingameControlsEditorArrayAdapter);
@@ -425,7 +477,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     }
 
     private void openQuickSettings() {
-        if(mQuickSettingSideDialog == null) {
+        if (mQuickSettingSideDialog == null) {
             mQuickSettingSideDialog = new QuickSettingSideDialog(this, mControlLayout) {
                 @Override
                 public void onResolutionChanged() {
@@ -447,52 +499,24 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         mQuickSettingSideDialog.appear(true);
     }
 
-    public static void toggleMouse(Context ctx) {
-        // Avoid going through the JNI each time.
-        if (GLFW.isGrabbing()) return;
-        GLFWCursorView cursorView = Tools.getWeakReference(weakCursor);
-        if(cursorView == null) return;
-        int toastString = 0;
-        switch (cursorView.getVisibility()) {
-            case View.GONE:
-            case View.INVISIBLE:
-                toastString = R.string.control_mouseon;
-                cursorView.setVisibility(View.VISIBLE);
-                break;
-            case View.VISIBLE:
-                toastString = R.string.control_mouseoff;
-                cursorView.setVisibility(View.GONE);
-                break;
-        }
-
-        if(toastString != 0) Toast.makeText(ctx, toastString, Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(isInEditor) {
-            if(event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                if(event.getAction() == KeyEvent.ACTION_DOWN) mControlLayout.askToExit(this);
+        if (isInEditor) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) mControlLayout.askToExit(this);
                 return true;
             }
             return super.dispatchKeyEvent(event);
         }
         boolean handleEvent;
-        if(!(handleEvent = launcherGLView.processKeyEvent(event))) {
+        if (!(handleEvent = launcherGLView.processKeyEvent(event))) {
             if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && !touchCharInput.isEnabled()) {
-                if(event.getAction() != KeyEvent.ACTION_UP) return true; // We eat it anyway
+                if (event.getAction() != KeyEvent.ACTION_UP) return true; // We eat it anyway
                 CallbackBridge.sendKeyPress(LwjglGlfwKeycode.GLFW_KEY_ESCAPE);
                 return true;
             }
         }
         return handleEvent;
-    }
-
-    public static void switchKeyboardState(boolean panning) {
-        if(touchCharInput != null) {
-            touchCharInput.switchKeyboardState();
-            MainActivity.mForceFullPanning = panning;
-        }
     }
 
     @Override
@@ -504,13 +528,13 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     @Override
     public void exitEditor() {
         try {
-            mControlLayout.loadLayout((CustomControls)null);
+            mControlLayout.loadLayout((CustomControls) null);
             mControlLayout.setModifiable(false);
             System.gc();
             mControlLayout.loadLayout(instance.getLaunchControls());
             mDrawerPullButton.setVisibility(mControlLayout.hasMenuButton() ? View.GONE : View.VISIBLE);
         } catch (Exception e) {
-            Tools.showError(this,e);
+            Tools.showError(this, e);
         }
 
         navDrawer.setAdapter(gameActionArrayAdapter);
@@ -548,7 +572,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
     @Override
     public boolean dispatchTrackballEvent(MotionEvent ev) {
-        if(Tools.isAndroid8OrHigher() && checkCaptureDispatchConditions(ev))
+        if (Tools.isAndroid8OrHigher() && checkCaptureDispatchConditions(ev))
             return launcherGLView.dispatchCapturedPointerEvent(ev);
         else return super.dispatchTrackballEvent(ev);
     }

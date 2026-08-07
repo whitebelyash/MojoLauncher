@@ -9,6 +9,7 @@ import git.artdeell.dnbootstrap.glfw.GLFW;
 
 public abstract class TouchEventProcessor {
     private final View mHostView;
+
     public TouchEventProcessor(View hostView) {
         mHostView = hostView;
     }
@@ -30,5 +31,6 @@ public abstract class TouchEventProcessor {
     }
 
     abstract public boolean processTouchEvent(MotionEvent motionEvent);
+
     abstract public void cancelPendingActions();
 }
