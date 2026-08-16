@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import git.artdeell.mojo.R;
+import git.artdeell.mojoexec.MojoExec;
 
 public class GameRunner {
     /**
@@ -168,10 +169,9 @@ public class GameRunner {
         File gamedir = instance.getGameDirectory();
         JVersionList.Version versionInfo = Tools.getVersionInfo(versionId);
 
-        // Switch renderer to GL4ES when running a compat context version on LTW
-        if(isCompatContext(versionInfo) && !hasAngelica(gamedir) && rendererName.equals("opengles3_ltw")) {
-            instance.renderer = rendererName = "opengles2";
-            instance.write();
+        // Enable SFPEW if required
+        if(LauncherPreferences.PREF_FORCE_SFPEW || (isCompatContext(versionInfo) && !hasAngelica(gamedir) && rendererName.equals("opengles3_ltw"))) {
+            MojoExec.setEnableSfpew(true);
         }
 
         boolean isGl4es = rendererName.equals("opengles2");

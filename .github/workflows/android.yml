@@ -33,11 +33,10 @@ jobs:
         uses: dawidd6/action-download-artifact@v6  
         continue-on-error: true
         with:
-          github_token: ${{ secrets.MESA_ACTIONS }}
-          repo: MojoLauncher/mesa-unified2
+          repo: whitebelyash/mesa-unified
           workflow: android.yml
           workflow_conclusion: success
-          branch: mojo/26.2
+          branch: 26.2-ci
           name: mesa-aar
           path: app_pojavlauncher/libs
 
