@@ -76,6 +76,7 @@ public class LauncherPreferences {
     public static boolean PREF_KEYBOARD_AUTOPANNING = true;
     public static boolean PREF_MIGRATION_NOTICE = true;
     public static boolean PREF_ALSOFT_FORCE_OPENSL = false;
+    public static boolean PREF_FORCE_SFPEW = false;
 
     public static void loadPreferences(Context ctx) {
         //Required for CTRLDEF_FILE and MultiRT
@@ -123,6 +124,7 @@ public class LauncherPreferences {
         PREF_ZINK_FORCE_LEGACY = DEFAULT_PREF.getBoolean("zinkForceLegacy", false);
         PREF_MIGRATION_NOTICE = DEFAULT_PREF.getBoolean("migrationNotice", true);
         PREF_ALSOFT_FORCE_OPENSL = DEFAULT_PREF.getBoolean("alsoftForceOpenSL", false);
+        PREF_FORCE_SFPEW = DEFAULT_PREF.getBoolean("forceSfpew", false);
 
         String argLwjglLibname = "-Dorg.lwjgl.opengl.libname=";
         for (String arg : JREUtils.parseJavaArguments(PREF_CUSTOM_JAVA_ARGS)) {

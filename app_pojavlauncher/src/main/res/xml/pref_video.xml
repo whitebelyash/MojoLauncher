@@ -68,5 +68,11 @@
             android:key="zinkForceLegacy"
             android:defaultValue="false"
             />
+        <SwitchPreference
+            android:title="@string/preference_force_sfpew_title"
+            android:summary="@string/preference_force_sfpew_description"
+            android:key="forceSfpew"
+            android:defaultValue="false"
+            />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -444,4 +444,6 @@
     <string name="loading_screen_title">Ожидание появления окна игры…</string>
     <string name="loading_screen_booted">Запущено - используется %1$s!</string>
     <string name="loading_screen_warning">Если окно долго не появляется - возможно игра вылетела</string>
+    <string name="preference_force_sfpew_title">Принудительно использовать SFPEW</string>
+    <string name="preference_force_sfpew_description">Принудительно включает использование SFPEW для любого визуализатора. Позволяет эмулировать FFP на визуализаторах, не поддерживающих данную функцию</string>
 </resources>

@@ -169,8 +169,8 @@ public class GameRunner {
         File gamedir = instance.getGameDirectory();
         JVersionList.Version versionInfo = Tools.getVersionInfo(versionId);
 
-        // Switch renderer to GL4ES when running a compat context version on LTW
-        if(isCompatContext(versionInfo) && !hasAngelica(gamedir) && rendererName.equals("opengles3_ltw")) {
+        // Enable SFPEW if required
+        if(LauncherPreferences.PREF_FORCE_SFPEW || (isCompatContext(versionInfo) && !hasAngelica(gamedir) && rendererName.equals("opengles3_ltw"))) {
             MojoExec.setEnableSfpew(true);
         }
 
