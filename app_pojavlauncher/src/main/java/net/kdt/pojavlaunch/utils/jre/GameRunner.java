@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import git.artdeell.mojo.R;
+import git.artdeell.mojoexec.MojoExec;
 
 public class GameRunner {
     /**
@@ -170,8 +171,7 @@ public class GameRunner {
 
         // Switch renderer to GL4ES when running a compat context version on LTW
         if(isCompatContext(versionInfo) && !hasAngelica(gamedir) && rendererName.equals("opengles3_ltw")) {
-            instance.renderer = rendererName = "opengles2";
-            instance.write();
+            MojoExec.setEnableSfpew(true);
         }
 
         boolean isGl4es = rendererName.equals("opengles2");
