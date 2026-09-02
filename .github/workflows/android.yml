@@ -23,11 +23,12 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         continue-on-error: true
         with:
-          repo: MojoLauncher/LTW
+          repo: whitebelyash/LTW
           workflow: android.yml
           workflow_conclusion: success
           name: output-aar
           path: app_pojavlauncher/libs
+          branch: exp/pvr
 
       - name: Get Mesa
         uses: dawidd6/action-download-artifact@v6  
