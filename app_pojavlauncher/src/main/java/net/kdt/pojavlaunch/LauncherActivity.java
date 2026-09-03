@@ -33,6 +33,7 @@ import net.kdt.pojavlaunch.extra.ExtraListener;
 import net.kdt.pojavlaunch.fragments.MainMenuFragment;
 import net.kdt.pojavlaunch.fragments.MicrosoftLoginFragment;
 import net.kdt.pojavlaunch.fragments.SelectAuthFragment;
+import net.kdt.pojavlaunch.game.GameActivity;
 import net.kdt.pojavlaunch.instances.Instance;
 import net.kdt.pojavlaunch.instances.InstanceInstaller;
 import net.kdt.pojavlaunch.instances.Instances;
@@ -117,6 +118,17 @@ public class LauncherActivity extends BaseActivity {
 
         if(selectedInstance.installer != null) {
             selectedInstance.installer.start();
+            return false;
+        }
+
+        // Vintage Story needs no account, no version download and no resource download.
+        if(selectedInstance.isVintageStory()) {
+            Intent gameIntent = new Intent(this, GameActivity.class);
+            gameIntent.putExtra(GameActivity.INTENT_LAUNCH_VERSION, Instance.TYPE_VINTAGE_STORY);
+            gameIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(gameIntent);
+            finish();
+            android.os.Process.killProcess(android.os.Process.myPid());
             return false;
         }
 

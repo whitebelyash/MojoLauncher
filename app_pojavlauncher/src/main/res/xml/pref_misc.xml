@@ -54,6 +54,10 @@
             android:key="clearMetadataCache"
             android:title="@string/preference_metadata_clear"
             android:summary="@string/preference_metadata_clear_summary" />
+        <Preference
+            android:key="deleteVintageStory"
+            android:title="@string/preference_vintagestory_delete_title"
+            android:summary="@string/preference_vintagestory_delete_summary" />
         <SwitchPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_px_memory_warning"

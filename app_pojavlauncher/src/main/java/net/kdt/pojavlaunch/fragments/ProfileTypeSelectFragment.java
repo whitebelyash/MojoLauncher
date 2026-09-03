@@ -2,6 +2,7 @@ package net.kdt.pojavlaunch.fragments;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,6 +12,8 @@ import git.artdeell.mojo.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.instances.Instance;
 import net.kdt.pojavlaunch.instances.Instances;
+import net.kdt.pojavlaunch.utils.jre.DotnetAssets;
+import net.kdt.pojavlaunch.utils.jre.VintageStoryRunner;
 
 import java.io.IOException;
 
@@ -53,5 +56,26 @@ public class ProfileTypeSelectFragment extends Fragment {
                 Tools.swapFragment(requireActivity(), NeoforgeInstallFragment.class, NeoforgeInstallFragment.TAG, null));
         view.findViewById(R.id.modded_profile_legacy_fabric).setOnClickListener((v) ->
                 Tools.swapFragment(requireActivity(), LegacyFabricInstallFragment.class, LegacyFabricInstallFragment.TAG, null));
+        view.findViewById(R.id.vs_profile).setOnClickListener(v -> {
+            if(!VintageStoryRunner.isArm64()) {
+                Toast.makeText(v.getContext(), R.string.vs_import_arch_unsupported, Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(DotnetAssets.isInstalled()) {
+                // Already installed globally - just create the instance.
+                try {
+                    Instances.setSelectedInstance(Instances.createInstance((i)-> {
+                        i.type = Instance.TYPE_VINTAGE_STORY;
+                        i.name = "Vintage Story";
+                    }, null));
+                    Tools.backToMainMenu(requireActivity());
+                }catch (java.io.IOException e) {
+                    Tools.showError(v.getContext(), e);
+                }
+                return;
+            }
+            Tools.swapFragment(requireActivity(), VintageStoryInstallFragment.class,
+                    VintageStoryInstallFragment.TAG, new Bundle(1));
+        });
     }
 }

@@ -328,6 +328,24 @@
     <string name="of_dl_progress">Downloading %s</string>
     <string name="mod_dl_install_optifine">Install OptiFine</string>
 
+    <string name="create_vintagestory_instance">Create Vintage Story instance</string>
+    <string name="vs_import_selecting">Select a Vintage Story (VSMobile) game data archive (.tgz or .tar.gz)</string>
+    <string name="vs_import_selecting_for">Select a game data archive for %s</string>
+    <string name="vs_import_select_button">Select game data</string>
+    <string name="vs_import_extracting">Importing game data and .NET runtime…</string>
+    <string name="vs_import_done">Vintage Story imported</string>
+    <string name="vs_import_failed">Import failed</string>
+    <string name="vs_import_arch_unsupported">Vintage Story requires a 64-bit ARM device</string>
+    <string name="preference_dotnet_runtime_title">Import .NET runtime</string>
+    <string name="preference_dotnet_runtime_summary">Import a .NET runtime archive (.tgz or .tar.gz) used by Vintage Story. Replaces the existing install.</string>
+    <string name="preference_dotnet_runtime_installed">.NET runtime installed</string>
+    <string name="preference_vintagestory_delete_title">Delete Vintage Story files</string>
+    <string name="preference_vintagestory_delete_summary">Delete the installed Vintage Story game data from this device</string>
+    <string name="preference_vintagestory_delete_confirm">This will permanently delete the installed Vintage Story game data. Continue?</string>
+    <string name="preference_vintagestory_delete_not_installed">Vintage Story is not installed</string>
+    <string name="preference_vintagestory_delete_fail">Failed to delete Vintage Story files</string>
+    <string name="preference_vintagestory_delete_done">Vintage Story files deleted</string>
+
 
     <string name="hint_search_modpack">Search for modpacks</string>
 

@@ -21,6 +21,9 @@ public class Instance extends DisplayInstance {
     public static final String VERSION_LATEST_RELEASE = "latest_release";
     public static final String VERSION_LATEST_SNAPSHOT = "latest_snapshot";
 
+    public static final String TYPE_MINECRAFT = "minecraft";
+    public static final String TYPE_VINTAGE_STORY = "vintagestory";
+
     public InstanceInstaller installer;
     public String renderer;
     public String jvmArgs;
@@ -28,6 +31,8 @@ public class Instance extends DisplayInstance {
     public String selectedRuntime;
     public String controlLayout;
     public boolean sharedData;
+    /** Type of the game this instance boots. {@link #TYPE_MINECRAFT} by default. */
+    public String type;
 
     protected Instance() {
     }
@@ -36,6 +41,12 @@ public class Instance extends DisplayInstance {
     protected void sanitize() {
         super.sanitize();
         sanitizeArgs();
+        if(!Tools.isValidString(type)) type = TYPE_MINECRAFT;
+    }
+
+    /** Whether this instance boots a .NET game (Vintage Story) instead of Minecraft. */
+    public boolean isVintageStory() {
+        return TYPE_VINTAGE_STORY.equals(type);
     }
 
     private void sanitizeArgs() {

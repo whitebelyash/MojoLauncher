@@ -10,3 +10,5 @@ app_pojavlauncher/.cxx/
 .vs/
 /curseforge_key.txt
 /app_pojavlauncher/libs/ltw-release.aar
+/app_pojavlauncher/src/main/assets/dotnet-runtime.tgz
+/app_pojavlauncher/src/main/assets/fontconfig.tgz

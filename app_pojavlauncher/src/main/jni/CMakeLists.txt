@@ -36,6 +36,26 @@ target_link_libraries(SDL3-shared PRIVATE mojoexec)
 
 project("MojoLauncher")
 
+# ------   .NET host (nethost, for .NET runtime hosting, e.g. Vintage Story)   ------
+# The bundled libnethost.so is built for arm64-v8a only, so the .NET host is
+# only compiled and linked into pojavexec on that ABI (blocking other ABIs from
+# trying to link a non-existent library).
+
+set(DOTNET_HOST_ENABLED OFF)
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+    set(DOTNET_HOST_ENABLED ON)
+endif()
+
+if(DOTNET_HOST_ENABLED)
+    add_library(nethost SHARED IMPORTED)
+    set_target_properties(nethost PROPERTIES
+            IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/dotnet_launcher/libnethost.so"
+    )
+    target_include_directories(nethost INTERFACE
+            "${CMAKE_CURRENT_SOURCE_DIR}/dotnet_launcher/include"
+    )
+endif()
+
 add_library(pojavexec SHARED
         affinity.c
         jvm_hooks/emui_iterator_fix_hook.c
@@ -50,8 +70,15 @@ add_library(pojavexec SHARED
         minibridge.c
 )
 
+if(DOTNET_HOST_ENABLED)
+    target_sources(pojavexec PRIVATE dotnet_launcher/dotnet_launcher.c)
+endif()
+
 target_include_directories(pojavexec PRIVATE .)
 target_link_libraries(pojavexec PRIVATE log mojoexec)
+if(DOTNET_HOST_ENABLED)
+    target_link_libraries(pojavexec PRIVATE nethost)
+endif()
 
 add_library(pojavexec_awt SHARED
 		awt/awt.c

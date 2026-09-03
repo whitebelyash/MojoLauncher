@@ -61,7 +61,35 @@ public class LauncherPreferenceMiscellaneousFragment extends LauncherPreferenceF
         });
         setupCacheClearPreference();
         setupMicrophoneRequestPreference();
+        setupVintageStoryDeletePreference();
         updateVisibility();
+    }
+
+    private void setupVintageStoryDeletePreference() {
+        Preference deletePreference = requirePreference("deleteVintageStory");
+        deletePreference.setOnPreferenceClickListener(preference -> {
+            if(!net.kdt.pojavlaunch.utils.jre.DotnetAssets.isInstalled()) {
+                Toast.makeText(getContext(), R.string.preference_vintagestory_delete_not_installed, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            new AlertDialog.Builder(getLauncherActivity())
+                    .setTitle(R.string.preference_vintagestory_delete_title)
+                    .setMessage(R.string.preference_vintagestory_delete_confirm)
+                    .setPositiveButton(android.R.string.ok, (d, w) -> {
+                        PojavApplication.sExecutorService.submit(() -> {
+                            try {
+                                net.kdt.pojavlaunch.utils.jre.DotnetAssets.removeAll();
+                            } catch (IOException e) {
+                                Tools.showErrorRemote(getLauncherActivity(), R.string.preference_vintagestory_delete_fail, e);
+                                return;
+                            }
+                            Tools.runOnUiThread(() -> Toast.makeText(getLauncherActivity(), R.string.preference_vintagestory_delete_done, Toast.LENGTH_LONG).show());
+                        });
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            return true;
+        });
     }
 
     private void updateVisibility(){

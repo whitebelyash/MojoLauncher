@@ -12,6 +12,13 @@
             android:summary="@string/multirt_subtitle"
             android:title="@string/multirt_title"/>
 
+        <Preference
+            android:key="install_dotnet_runtime"
+            android:icon="@drawable/ic_px_runtime_mgr"
+            android:persistent="false"
+            android:summary="@string/preference_dotnet_runtime_summary"
+            android:title="@string/preference_dotnet_runtime_title"/>
+
         <androidx.preference.EditTextPreference
             android:dialogTitle="@string/mcl_setting_title_javaargs"
             android:icon="@drawable/ic_px_console"

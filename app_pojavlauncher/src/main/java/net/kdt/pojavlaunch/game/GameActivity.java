@@ -73,6 +73,7 @@ import net.kdt.pojavlaunch.utils.MCOptionUtils;
 import net.kdt.pojavlaunch.authenticator.accounts.Account;
 import net.kdt.pojavlaunch.utils.RendererCompatUtil;
 import net.kdt.pojavlaunch.utils.jre.GameRunner;
+import net.kdt.pojavlaunch.utils.jre.VintageStoryRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -388,6 +389,18 @@ public class GameActivity extends BaseActivity implements ControlButtonMenuListe
     }
 
     private void runCraft(String versionId, File[] classpath) throws Throwable {
+        // Vintage Story boots through the .NET runtime, not the Java VM.
+        if(Instance.TYPE_VINTAGE_STORY.equals(versionId)) {
+            Logger.appendToLog("--------- Starting game with Launcher Debug!");
+            JREUtils.redirectAndPrintJRELog();
+            try {
+                VintageStoryRunner.launchGame(this, instance);
+            } finally {
+                Tools.runOnUiThread(()-> mServiceBinder.isActive = false);
+            }
+            return;
+        }
+
         String renderer = instance.getLaunchRenderer();
         if(!RendererCompatUtil.checkRendererCompatible(this, renderer)) {
             RendererCompatUtil.RenderersList renderersList = RendererCompatUtil.getCompatibleRenderers(this);

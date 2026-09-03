@@ -172,6 +172,10 @@ android {
         pickFirst '**/libbytehook.so'
     }
 
+    androidResources {
+        noCompress += "tgz"
+    }
+
     buildFeatures {
         buildConfig true
     }
