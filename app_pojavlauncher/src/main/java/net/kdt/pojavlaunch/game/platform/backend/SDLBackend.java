@@ -1,6 +1,7 @@
 package net.kdt.pojavlaunch.game.platform.backend;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 
@@ -41,6 +42,7 @@ public class SDLBackend implements PlatformBackend {
         // TODO: check what can be moved to the initialize point
         // we need to setup enough SDL for the game to not crash to initialize it later
         SDL.initialize();
+        System.loadLibrary("SDL2");
         SDL.setContext(activity);
         SDL.setupJNI();
         SDLControllerManager.initializeDeviceListener();
@@ -60,6 +62,7 @@ public class SDLBackend implements PlatformBackend {
         int w = GameView.getWindowWidth();
         int h = GameView.getWindowHeight();
         float r = GameView.getWindowRate();
+        Log.i("SDLBackend", "Pushing SDL screen resolution: " + w + "x" + h + " @" + r);
         SDLActivity.nativeSetScreenResolution(w, h, w, h, 1.0f, r);
         SDLActivity.onNativeResize();
     }

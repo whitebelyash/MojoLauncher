@@ -7,8 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.system.Os;
 import android.view.View;
 import android.widget.ImageButton;
@@ -33,6 +36,7 @@ import net.kdt.pojavlaunch.extra.ExtraListener;
 import net.kdt.pojavlaunch.fragments.MainMenuFragment;
 import net.kdt.pojavlaunch.fragments.MicrosoftLoginFragment;
 import net.kdt.pojavlaunch.fragments.SelectAuthFragment;
+import net.kdt.pojavlaunch.game.GameActivity;
 import net.kdt.pojavlaunch.instances.Instance;
 import net.kdt.pojavlaunch.instances.InstanceInstaller;
 import net.kdt.pojavlaunch.instances.Instances;
@@ -60,6 +64,7 @@ public class LauncherActivity extends BaseActivity {
     private ProgressServiceKeeper mProgressServiceKeeper;
     private NotificationManager mNotificationManager;
     private static ActivityResultLauncher<String> mRequestPermissionLauncher;
+    private ActivityResultLauncher<Intent> mManageStorageLauncher;
 
     /* Allows to switch from one button "type" to another */
     private final FragmentManager.FragmentLifecycleCallbacks mFragmentCallbackListener = new FragmentManager.FragmentLifecycleCallbacks() {
@@ -151,6 +156,16 @@ public class LauncherActivity extends BaseActivity {
         }
         return false;
     };
+    private void requestAllFilesAccess() {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()) return;
+        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        if(getPackageManager().resolveActivity(intent, 0) == null){
+            intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+        }
+        mManageStorageLauncher.launch(intent);
+    }
+
     @Override
     protected boolean shouldIgnoreNotch() {
         return getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
@@ -184,6 +199,15 @@ public class LauncherActivity extends BaseActivity {
                 }
         );
         checkNotificationPermission();
+        mManageStorageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()){
+                        Toast.makeText(this, R.string.all_files_access_required, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+        requestAllFilesAccess();
         if(LauncherPreferences.PREF_MIGRATION_NOTICE)
             PojavApplication.sExecutorService.submit(this::checkPreviousInstalls);
 

@@ -381,6 +381,7 @@
     <string name="notification_permission_dialog_title">Permission request</string>
     <string name="notification_permission_dialog_text">MJLauncher requires a permission to post notifications to prevent game/modpack downloads from stopping when you leave the app. Without this permission, Android may shut down your downloads when you put MJLauncher in background mode.</string>
     <string name="notification_permission_toast">You can always change your mind later by going into Settings</string>
+    <string name="all_files_access_required">All files access is required for GTA V data (storage/games/GTAV). Grant it and restart the game.</string>
     <string name="preference_ask_for_notification_title">Allow notifications</string>
     <string name="preference_ask_for_notification_description">Click to re-request the notification permission, required for game/modpack background downloads to work properly.</string>
     <string name="preference_vsync_in_zink_title">Allow V-Sync with Zink</string>

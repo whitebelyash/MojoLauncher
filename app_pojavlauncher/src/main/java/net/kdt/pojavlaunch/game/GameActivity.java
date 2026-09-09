@@ -85,6 +85,9 @@ public class GameActivity extends BaseActivity implements ControlButtonMenuListe
     public static final String INTENT_LAUNCH_VERSION = "intent_version";
     public static final String INTENT_LAUNCH_CLASSPATH = "intent_classpath";
 
+    static { System.loadLibrary("gta5_shim"); }
+    private static native int nativeBootGta5(String libraryPath);
+
     public static TouchCharInput touchCharInput;
     private GameView launcherGLView;
     private static WeakReference<GameCursorView> weakCursor;
@@ -253,7 +256,8 @@ public class GameActivity extends BaseActivity implements ControlButtonMenuListe
             launcherGLView.setSurfaceReadyListener(() -> {
                 try {
                     Tools.runOnUiThread(() -> { if(PREF_VIRTUAL_MOUSE_START) launcherGLView.mCursorView.setVisibility(View.VISIBLE); });
-                    runCraft(version, classpath);
+                    System.loadLibrary("c++_shared");
+                    bootGta5();
                 }catch (Throwable e){
                     Tools.showErrorRemote(e);
                 }
@@ -261,6 +265,14 @@ public class GameActivity extends BaseActivity implements ControlButtonMenuListe
         } catch (Throwable e) {
             Tools.showError(this, e, true);
         }
+    }
+
+    private void bootGta5() {
+        File gtaLib = new File(getApplicationInfo().nativeLibraryDir, "libgtav.so");
+        Log.i("GameActivity", "Booting GTA5 from " + gtaLib.getAbsolutePath());
+        int result = nativeBootGta5(gtaLib.getAbsolutePath());
+        Log.i("GameActivity", "GTA5 exited with code " + result);
+        Tools.restartLauncherActivity(this);
     }
 
     private void loadControls() {

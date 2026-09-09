@@ -72,3 +72,6 @@ add_library(awt_xawt SHARED
         awt_xawt/xawt_fake.c
 )
 target_link_libraries(awt_xawt PRIVATE awt_headless)
+
+add_library(gta5_shim SHARED gta5_shim.c)
+target_link_libraries(gta5_shim PRIVATE log dl)
