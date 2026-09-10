@@ -20,6 +20,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -80,13 +82,14 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 import git.artdeell.mojo.R;
+import git.artdeell.mojoexec.MojoExec;
 
 public class GameActivity extends BaseActivity implements ControlButtonMenuListener, EditorExitable, ServiceConnection {
     public static final String INTENT_LAUNCH_VERSION = "intent_version";
     public static final String INTENT_LAUNCH_CLASSPATH = "intent_classpath";
 
     static { System.loadLibrary("gta5_shim"); }
-    private static native int nativeBootGta5(String libraryPath);
+    private static native int nativeBootGta5(String libraryPath, String logPath);
 
     public static TouchCharInput touchCharInput;
     private GameView launcherGLView;
@@ -268,9 +271,33 @@ public class GameActivity extends BaseActivity implements ControlButtonMenuListe
     }
 
     private void bootGta5() {
+        try {
+            Os.setenv("TMPDIR", Tools.DIR_CACHE.getAbsolutePath(), true);
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
+        }
+        String gameRoot = "/sdcard/Games/GTAV";
+        String instanceRoot = instance.getGameDirectory().getAbsolutePath();
+        try {
+            Os.setenv("GTAV_GAME_DIR", gameRoot, true);
+            Os.setenv("GTA5_ARGS",
+                    "-output -useFinalShaders=1 -rootdir=" + gameRoot +
+                    " -commonpack=" + gameRoot + "/common.rpf" +
+                    " -audiopack=" + gameRoot + "/x64/audio/audio_rel.rpf" +
+                    " -update=" + gameRoot + "/update" +
+                    " -userdir=" + instanceRoot +
+                    " -uilanguage=russian -noSocialClub -override_script=script_rel -nonetlogs -kbgame -nokeyboardhook",
+                    true);
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
+        }
+        System.loadLibrary("mojoexec");
+        MojoExec.setNativeLibraryDir(getApplicationInfo().nativeLibraryDir);
+        MojoExec.setUseTurnip(true);
         File gtaLib = new File(getApplicationInfo().nativeLibraryDir, "libgtav.so");
+        File latestLogFile = new File(Tools.DIR_GAME_HOME, "latestlog.txt");
         Log.i("GameActivity", "Booting GTA5 from " + gtaLib.getAbsolutePath());
-        int result = nativeBootGta5(gtaLib.getAbsolutePath());
+        int result = nativeBootGta5(gtaLib.getAbsolutePath(), latestLogFile.getAbsolutePath());
         Log.i("GameActivity", "GTA5 exited with code " + result);
         Tools.restartLauncherActivity(this);
     }
