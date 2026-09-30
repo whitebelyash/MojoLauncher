@@ -226,7 +226,7 @@ public class Platform {
     public static void sendCursorPosition() {
         if(mCursorImplementor != null) mCursorImplementor.onCursorPosition();
         if (!isGrabbing) clampCursorPosition();
-        PLATFORM.sendMousePosition(Math.floor(Platform.cursorX), Math.floor(Platform.cursorY), isGrabbing);
+        PLATFORM.sendMousePosition(Platform.cursorX, Platform.cursorY, isGrabbing);
     }
 
     /**
