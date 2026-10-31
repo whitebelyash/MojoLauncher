@@ -15,6 +15,8 @@ import java.util.Set;
 import me.andreasmelone.basicmodinfoparser.platform.BasicModInfo;
 import me.andreasmelone.basicmodinfoparser.platform.Platform;
 import me.andreasmelone.basicmodinfoparser.platform.dependency.Dependency;
+import me.andreasmelone.basicmodinfoparser.platform.dependency.ProvidedMod;
+import me.andreasmelone.basicmodinfoparser.platform.modinfo.ProvidesList;
 import me.andreasmelone.basicmodinfoparser.util.ModInfoParseException;
 
 public class DependencyScanner {
@@ -53,6 +55,29 @@ public class DependencyScanner {
             }
         }
     }
+
+    private List<String> namesOf(BasicModInfo bmi) {
+        List<String> res = new ArrayList<>();
+        if(bmi.getId() != null) res.add(bmi.getId());
+        if(bmi instanceof ProvidesList) {
+            List<? extends ProvidedMod<?>> provided = ((ProvidesList) bmi).getProvidedIds();
+            if(provided != null) {
+                for(ProvidedMod<?> providedMod : provided) {
+                    if(providedMod != null && providedMod.getId() != null)
+                        res.add(providedMod.getId());
+                }
+            }
+        }
+        return res;
+    }
+
+    private void enqueueIds(BasicModInfo bmi, Deque<ModInfo> deque) {
+        for(String name : namesOf(bmi)) {
+            List<ModInfo> next = mDeps.get(name);
+            if(next != null) deque.addAll(next);
+        }
+    }
+
     private List<Dependency> getDependencies(ModInfo mi) {
         if(!(mi instanceof ContainedModInfo)) return Collections.emptyList();
         BasicModInfo bmi = getBasicInfo((ContainedModInfo) mi);
@@ -77,19 +102,16 @@ public class DependencyScanner {
         Set<ModInfo> visited = new HashSet<>();
         Deque<ModInfo> queue = new ArrayDeque<>();
         visited.add(mi);
-        List<ModInfo> direct = mDeps.get(bmi.getId());
-        if(direct != null) queue.addAll(direct);
+        enqueueIds(bmi, queue);
         while(!queue.isEmpty()) {
             ModInfo current = queue.poll();
-            if(current == mi || visited.contains(current)) continue;
+            if(current == null || current == mi || visited.contains(current)) continue;
             visited.add(current);
             if(current.disabled) continue;
             res.add(current);
-            for(Dependency dep : getDependencies(current)) {
-                if(!dep.isMandatory()) continue;
-                List<ModInfo> next = mDeps.get(dep.getModId());
-                if(next != null) queue.addAll(next);
-            }
+            BasicModInfo currInfo = getBasicInfo((ContainedModInfo) current);
+            if(currInfo == null || currInfo.getId() == null) continue;
+            enqueueIds(currInfo, queue);
         }
         return res;
     }
