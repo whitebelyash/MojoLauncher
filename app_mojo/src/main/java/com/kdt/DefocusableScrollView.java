@@ -1,9 +1,9 @@
 package com.kdt;
 
-import android.content.Context;
-import android.graphics.Rect;
-import android.util.AttributeSet;
-import android.widget.ScrollView;
+import mojui.content.Context;
+import mojui.graphics.Rect;
+import mojui.util.AttributeSet;
+import mojui.widget.ScrollView;
 
 /**
     Class allowing to ignore the focusing from an item such an EditText within it.

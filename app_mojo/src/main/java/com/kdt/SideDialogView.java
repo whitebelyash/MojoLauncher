@@ -1,24 +1,24 @@
 package com.kdt;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
-import android.widget.TextView;
+import mojui.animation.Animator;
+import mojui.animation.AnimatorListenerAdapter;
+import mojui.animation.ObjectAnimator;
+import mojui.content.Context;
+import mojui.util.Log;
+import mojui.view.LayoutInflater;
+import mojui.view.View;
+import mojui.view.ViewGroup;
+import mojui.view.animation.AccelerateDecelerateInterpolator;
+import mojui.widget.Button;
+import mojui.widget.TextView;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.core.content.res.ResourcesCompat;
+import mojui.core.content.res.ResourcesCompat;
 
 import git.artdeell.mojo.R;
 

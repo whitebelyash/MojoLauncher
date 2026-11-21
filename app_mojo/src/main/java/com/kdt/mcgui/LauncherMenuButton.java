@@ -1,17 +1,17 @@
 package com.kdt.mcgui;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import mojui.content.Context;
+import mojui.content.res.Resources;
+import mojui.content.res.TypedArray;
+import mojui.util.AttributeSet;
+import mojui.util.TypedValue;
+import mojui.view.Gravity;
+import mojui.view.ViewGroup;
+import mojui.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
+import mojui.core.content.res.ResourcesCompat;
 
 
 import git.artdeell.mojo.R;

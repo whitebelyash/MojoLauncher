@@ -1,19 +1,19 @@
 package com.kdt.mcgui;
 
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import mojui.content.Context;
+import mojui.util.AttributeSet;
+import mojui.util.Log;
+import mojui.view.View;
+import mojui.widget.ImageView;
+import mojui.widget.LinearLayout;
+import mojui.widget.TextView;
+import mojui.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import mojui.constraintlayout.widget.ConstraintLayout;
 
 import git.artdeell.mojo.R;
 

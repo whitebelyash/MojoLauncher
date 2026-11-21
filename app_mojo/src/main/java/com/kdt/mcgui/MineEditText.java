@@ -1,11 +1,11 @@
 package com.kdt.mcgui;
 
-import android.content.*;
-import android.util.*;
-import android.graphics.*;
-import android.widget.EditText;
+import mojui.content.*;
+import mojui.util.*;
+import mojui.graphics.*;
+import mojui.widget.EditText;
 
-public class MineEditText extends androidx.appcompat.widget.AppCompatEditText {
+public class MineEditText extends mojui.appcompat.widget.AppCompatEditText {
 	public MineEditText(Context ctx) {
 		super(ctx);
 		init();

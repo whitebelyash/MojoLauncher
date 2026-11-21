@@ -1,32 +1,32 @@
 package com.kdt.mcgui;
 
-import android.content.Context;
-import android.graphics.BlendMode;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
-import android.widget.ProgressBar;
+import mojui.content.Context;
+import mojui.graphics.BlendMode;
+import mojui.graphics.Canvas;
+import mojui.graphics.Color;
+import mojui.graphics.Paint;
+import mojui.graphics.drawable.ColorDrawable;
+import mojui.graphics.drawable.Drawable;
+import mojui.util.AttributeSet;
+import mojui.widget.ProgressBar;
 
 import androidx.annotation.StringRes;
-import androidx.core.content.res.ResourcesCompat;
+import mojui.core.content.res.ResourcesCompat;
 
 import git.artdeell.mojo.R;
 
 public class TextProgressBar extends ProgressBar {
 
     private int mTextPadding = 0;
-    public TextProgressBar(Context context) {super(context, null, android.R.attr.progressBarStyleHorizontal); init();}
+    public TextProgressBar(Context context) {super(context, null, mojui.R.attr.progressBarStyleHorizontal); init();}
 
-    public TextProgressBar(Context context, AttributeSet attrs) {super(context, attrs, android.R.attr.progressBarStyleHorizontal); init();}
+    public TextProgressBar(Context context, AttributeSet attrs) {super(context, attrs, mojui.R.attr.progressBarStyleHorizontal); init();}
     public TextProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, android.R.attr.progressBarStyleHorizontal);
+        super(context, attrs, mojui.R.attr.progressBarStyleHorizontal);
         init();
     }
     public TextProgressBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, android.R.attr.progressBarStyleHorizontal, defStyleRes);
+        super(context, attrs, mojui.R.attr.progressBarStyleHorizontal, defStyleRes);
         init();
     }
 

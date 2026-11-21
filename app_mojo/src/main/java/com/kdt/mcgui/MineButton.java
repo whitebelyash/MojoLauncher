@@ -1,14 +1,14 @@
 package com.kdt.mcgui;
 
-import android.content.*;
-import android.graphics.*;
-import android.util.*;
+import mojui.content.*;
+import mojui.graphics.*;
+import mojui.util.*;
 
-import androidx.core.content.res.ResourcesCompat;
+import mojui.core.content.res.ResourcesCompat;
 
 import git.artdeell.mojo.R;
 
-public class MineButton extends androidx.appcompat.widget.AppCompatButton {
+public class MineButton extends mojui.appcompat.widget.AppCompatButton {
 	
 	public MineButton(Context ctx) {
 		this(ctx, null);

@@ -1,11 +1,11 @@
 package com.kdt;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.os.Build;
-import android.util.AttributeSet;
-import android.widget.SeekBar;
+import mojui.content.Context;
+import mojui.content.res.TypedArray;
+import mojui.os.Build;
+import mojui.util.AttributeSet;
+import mojui.widget.SeekBar;
 
 import androidx.annotation.Nullable;
 
