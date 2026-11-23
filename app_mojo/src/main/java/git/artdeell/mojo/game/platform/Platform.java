@@ -17,7 +17,6 @@ import git.artdeell.mojo.input.gamepad.Gamepad;
 import git.artdeell.mojo.game.platform.backend.AWTBackend;
 import git.artdeell.mojo.game.platform.backend.DummyBackend;
 import git.artdeell.mojo.utils.lifecycle.ContextExecutor;
-import git.artdeell.mojo.game.platform.backend.GLFWBackend;
 import git.artdeell.mojo.game.platform.backend.PlatformBackend;
 import git.artdeell.mojo.game.platform.backend.SDLBackend;
 import git.artdeell.mojo.game.platform.clipboard.AndroidClipboard;
@@ -25,7 +24,6 @@ import git.artdeell.mojo.game.platform.cursor.PlatformCursor;
 import git.artdeell.mojo.game.platform.cursor.PlatformCursorImplementor;
 import git.artdeell.mojo.game.platform.input.PlatformGamepad;
 import git.artdeell.mojo.game.platform.input.PlatformGrabListener;
-import git.artdeell.mojo.game.platform.input.gamepad.GLFWGamepad;
 import git.artdeell.mojo.game.platform.input.gamepad.GenericGamepad;
 import git.artdeell.mojo.game.platform.input.gamepad.SDLGamepad;
 
@@ -34,7 +32,6 @@ import java.util.List;
 
 import fr.spse.gamepad_remapper.RemapperManager;
 import fr.spse.gamepad_remapper.RemapperView;
-import git.artdeell.dnbootstrap.glfw.GLFW;
 import git.mojo.sdl.SDLActivity;
 import git.mojo.sdl.SDLControllerManager;
 
@@ -65,17 +62,13 @@ public class Platform {
         Platform.mHostView = view;
         Platform.mInputManager = createRemapperManager(view);
         mClipboard = new AndroidClipboard(activity.getApplicationContext());
-        GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
         SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
         AWTBridge.setEnableCallback(() -> onInit(new AWTBackend()));
         SDLActivity.setClipboard(mClipboard);
-        GLFW.setClipboardImpl(mClipboard);
         // SDL can handle gamepads on its own, so route all events through it
         // if SDL was detected of course (the check is based on detectDevices)
         // Vanilla SDL client shouldn't touch input system and thus cause emulated input to break
         SDLControllerManager.setEnabledCallback(() -> setPlatformGamepad(new SDLGamepad()));
-        // GLFW also has equivalent "onDirectGamepadEnable". Hook it up
-        GLFW.setGamepadEnableHandler(() -> setPlatformGamepad(new GLFWGamepad(view.getContext(), mInputManager)));
         SDLBackend.initialize(activity);
     }
 

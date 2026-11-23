@@ -4,13 +4,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 
-import git.artdeell.dnbootstrap.glfw.GLFWClipboard;
 import git.mojo.sdl.SDLClipboard;
 
 /**
  * Android clipboard implementation for GLFW/SDL
  */
-public class AndroidClipboard implements GLFWClipboard, SDLClipboard {
+public class AndroidClipboard implements SDLClipboard {
     private final ClipboardManager mClipboardManager;
 
     public AndroidClipboard(Context context) {
