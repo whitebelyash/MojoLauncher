@@ -5,20 +5,6 @@ cmake_minimum_required(VERSION 3.22.1)
 
 add_subdirectory(mojoexec)
 
-# ------   GLFW   ------
-
-set(GLFW_BUILD_WAYLAND  OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_X11      OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_ANDROID  ON  CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS   ON  CACHE BOOL "" FORCE)
-
-add_subdirectory(glfw)
-
-target_compile_options(glfw PRIVATE -Wno-nullability-completeness)
-
 # ------   SDL   ------
 
 set(SDL_SHARED       ON CACHE BOOL "" FORCE)
