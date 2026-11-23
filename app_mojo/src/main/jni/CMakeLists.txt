@@ -18,6 +18,13 @@ set(SDL3_MAINPROJECT OFF CACHE BOOL "" FORCE)
 add_subdirectory(sdl)
 target_link_libraries(SDL3-shared PRIVATE mojoexec)
 
+# ------ GLFW2SDL ------
+
+set(GLFW_SDL_BUILD_STATIC OFF CACHE BOOL "" FORCE)
+set(GLFW_SDL_SMOKE_TEST   OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(glfw2sdl)
+
 # ----------------------
 
 project("MojoLauncher")

@@ -10,3 +10,6 @@
 [submodule "NoBlocklist"]
 	path = NoBlocklist
 	url = https://github.com/MojoLauncher/NoBlocklist
+[submodule "glfw2sdl"]
+	path = glfw2sdl
+	url = https://git.whbex.ru/local/glfw2sdl
