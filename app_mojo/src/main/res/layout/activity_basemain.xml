@@ -36,8 +36,7 @@
 					android:id="@+id/main_cursorview"
 					android:focusable="false"
 					android:translationZ="1dp"
-					android:visibility="gone"
-					app:defaultCursorDrawable="@drawable/ic_mouse_pointer"/>
+					android:visibility="gone" />
 
 			</git.artdeell.mojo.game.GameView>
 
